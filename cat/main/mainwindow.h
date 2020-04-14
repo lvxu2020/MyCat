@@ -14,8 +14,20 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+signals:
+    void sig_scanWIFI();
+private slots:
+    void slot_scanBarVelChanged(int);
+
+
+    void on_WIFIScan_clicked();
+
+
+
+    void on_listWIFI_clicked(const QModelIndex &index);
 
 private:
     Ui::MainWindow *ui;
+    void init();
 };
 #endif // MAINWINDOW_H

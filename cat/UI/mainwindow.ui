@@ -39,6 +39,16 @@
         <height>281</height>
        </rect>
       </property>
+      <item>
+       <property name="text">
+        <string>新建项目</string>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+        </font>
+       </property>
+      </item>
      </widget>
      <widget class="QPushButton" name="WIFIScan">
       <property name="geometry">

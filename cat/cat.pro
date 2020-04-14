@@ -16,14 +16,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp
+    UI/dialogwificonnect.cpp \
+    WIFI/wifi.cpp \
+    main/main.cpp \
+    main/mainwindow.cpp
 
 HEADERS += \
-    mainwindow.h
+    UI/dialogwificonnect.h \
+    WIFI/wifi.h \
+    main/mainwindow.h
 
 FORMS += \
-    mainwindow.ui
+    UI/dialogwificonnect.ui \
+    UI/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
