@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "./UI/WIFI/dialogscanmask.h"
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,8 +19,7 @@ public:
 signals:
     void sig_scanWIFI();
 private slots:
-    void slot_scanBarVelChanged(int);
-
+    void slot_scanfOver();
 
     void on_WIFIScan_clicked();
 
@@ -28,6 +29,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    DialogScanMask *scanMask;
     void init();
 };
 #endif // MAINWINDOW_H

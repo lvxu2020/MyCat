@@ -1,15 +1,16 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "../WIFI/wifi.h"
-#include "../UI/dialogwificonnect.h"
 
+#include "./WIFI/wifi.h"
+#include "./UI/WIFI/dialogwificonnect.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(WIFI::getInstance(),SIGNAL(sig_scanBarVelChange(int)),this,SLOT(slot_scanBarVelChanged(int)));
+    scanMask = new DialogScanMask(this);
+    connect(WIFI::getInstance(),SIGNAL(sig_scanOver()),this,SLOT(slot_scanfOver()));
     connect(this,SIGNAL(sig_scanWIFI()),WIFI::getInstance(),SLOT(slot_scanWIFI()));
 
     init();
@@ -17,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    delete scanMask;
     delete ui;
 }
 
@@ -29,29 +31,32 @@ void MainWindow::init()
     //WIFI链接状态
     ui->WIFIConnect->setText("未链接");
     ui->WIFIName->setText("");
-    //WIFI扫描进度条
-    ui->scanWIFIBar->hide();
-    ui->scanWIFIBar->setValue(0);
-
-
 }
-void MainWindow::slot_scanBarVelChanged(int vel){
-    if(vel == 0){
-        ui->scanWIFIBar->hide();
-    }
-    ui->scanWIFIBar->setValue(vel);
+void MainWindow::slot_scanfOver(){
+
+    QListWidgetItem* aItem=new QListWidgetItem();
+    aItem->setText(" woshi xin jian de"); //设置文字标签
+    QFont font;
+    font.setPointSize(18);
+    aItem->setFont(font);
+    aItem->setFlags(Qt::ItemIsSelectable |Qt::ItemIsUserCheckable |Qt::ItemIsEnabled);
+    ui->listWIFI->addItem(aItem);
+    scanMask->close();
 }
 
 void MainWindow::on_WIFIScan_clicked()
 {
-    ui->scanWIFIBar->show();
     emit sig_scanWIFI();
+
+    scanMask->show();
 }
 
 
 
 void MainWindow::on_listWIFI_clicked(const QModelIndex &index)
 {
+
     DialogWIFIConnect dialog(this);
     dialog.exec();
+
 }

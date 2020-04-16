@@ -13,10 +13,10 @@ public:
     ~WIFI();
 
 signals:
-    void sig_scanBarVelChange(int);
+    void sig_scanOver();
 public slots:
     void slot_scanWIFI();
-    void slot_scanBarVelue();
+    void slot_scanOver();
 private:
     QTimer* scanBarTimer = nullptr;
 };
