@@ -10,8 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     scanMask = new DialogScanMask(this);
-    connect(WIFI::getInstance(),SIGNAL(sig_scanOver()),this,SLOT(slot_scanfOver()));
-    connect(this,SIGNAL(sig_scanWIFI()),WIFI::getInstance(),SLOT(slot_scanWIFI()));
+    connect(WIFI_Single::instance(),SIGNAL(sig_scanOver()),this,SLOT(slot_scanfOver()));
+    connect(this,SIGNAL(sig_scanWIFI()),WIFI_Single::instance(),SLOT(slot_scanWIFI()));
 
     init();
 }

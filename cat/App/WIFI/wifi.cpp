@@ -4,7 +4,7 @@
 #include <iostream>
 #include "../../Base/base.h"
 
-WIFI* WIFI::instance = nullptr;
+
 WIFI::WIFI()
 {
     //wifi遮罩
@@ -17,18 +17,9 @@ WIFI::WIFI()
 WIFI::~WIFI()
 {
     delete scanBarTimer;
-    delete instance;
 }
 
-WIFI* WIFI::getInstance(){
-    static WIFI* wifi = NULL;
-        if(!wifi)
-        {
-            wifi = new WIFI();
-            instance = wifi;
-        }
-        return wifi;
-}
+
 
 void WIFI::slot_scanOver(){
     mySleep(3000);

@@ -37,5 +37,6 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-LIBS += -L /home/lvxu/myCat/executableProgram/Base -lBase
+LIBS += -L ~/myCat/executableProgram/Cat/lib -lBase
+DESTDIR = ~/myCat/executableProgram/Cat
 
