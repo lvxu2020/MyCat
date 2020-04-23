@@ -2,6 +2,7 @@
 #define BASE_H
 
 #include <QObject>
+#include <QDebug>
 
 namespace BaseSpace{
     using namespace std;

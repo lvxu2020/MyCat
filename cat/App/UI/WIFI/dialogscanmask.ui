@@ -19,10 +19,9 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">
-</string>
+   <string notr="true"/>
   </property>
-  <widget class="QLabel" name="labelScaning">
+  <widget class="QLabel" name="label_1">
    <property name="geometry">
     <rect>
      <x>240</x>

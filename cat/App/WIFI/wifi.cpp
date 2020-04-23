@@ -22,7 +22,7 @@ WIFI::~WIFI()
 
 
 void WIFI::slot_scanOver(){
-    mySleep(3000);
+    mySleep(1000);
     emit sig_scanOver();
 }
 
