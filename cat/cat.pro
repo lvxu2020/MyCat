@@ -1,5 +1,3 @@
 TEMPLATE      = subdirs
-SUBDIRS += Base \
-           App
+SUBDIRS += App
 
-APP.depends = Base

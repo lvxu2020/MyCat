@@ -3,6 +3,8 @@
 #include <QKeyEvent>
 #include "dialogconnectmask.h"
 #include "../../../Base/base.h"
+#include "../../WIFI/wifi.h"
+#include <QTimer>
 
 
 DialogWIFIConnect::DialogWIFIConnect(QWidget *parent) :
@@ -12,12 +14,18 @@ DialogWIFIConnect::DialogWIFIConnect(QWidget *parent) :
     ui->setupUi(this);
     ui->WIFIPwd->installEventFilter(this);
     setWIFIPwdStrLen(32);
+    ui->WIFIName->setText(QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()));
+    connectTimer = new QTimer(this);
+    connectTimer->setInterval(0);
+    connectTimer->setSingleShot(true);//触发一次
+    connect(connectTimer,SIGNAL(timeout()),this,SLOT(slot_connectWifi()));
 }
 
 
 
 DialogWIFIConnect::~DialogWIFIConnect()
 {
+    delete connectTimer;
     delete ui;
 }
 
@@ -667,8 +675,21 @@ void DialogWIFIConnect::on_btn_xiegang_clicked()
 
 void DialogWIFIConnect::on_btnConnect_clicked()
 {
+    connectTimer->start();
     DialogConnectMask diaConnect(this);
     connectUi = &diaConnect;
     diaConnect.exec();
     connectUi = nullptr;
+}
+void DialogWIFIConnect::slot_connectWifi()
+{
+    system("rm /var/run/wpa_supplicant/wlan0");
+    system("wpa_cli terminate");
+    QString connect = "wpa_passphrase "+ QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()) \
+     + " " + WIFIPwdStr + " > /home/debian/Cat/wifi.conf";
+    QByteArray command = connect.toLatin1();
+    system(command.data());
+    system(" wpa_supplicant -B -c wifi.conf -iwlan0 ");
+    system(" ifconfig wlan0 up ");
+    connectUi->close();
 }

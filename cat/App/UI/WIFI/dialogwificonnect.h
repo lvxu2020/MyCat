@@ -121,6 +121,7 @@ private slots:
 
     void on_btnConnect_clicked();
 
+    void slot_connectWifi();
 private:
     Ui::DialogWIFIConnect *ui;
     DialogConnectMask *connectUi = nullptr;
@@ -128,6 +129,8 @@ private:
     bool isSHIFT = false;
     QString WIFIPwdStr = "";
     int WIFIPwdStrLen = 0;
+
+    QTimer* connectTimer = nullptr;
 };
 
 #endif // DIALOGWIFICONNECT_H

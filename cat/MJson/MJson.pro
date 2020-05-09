@@ -3,7 +3,7 @@
 #QT -= gui
 
 HEADERS += \
-    $$PWD/*.h \
+    $$PWD/*.h
 
 SOURCES += \
     $$PWD/*.cpp

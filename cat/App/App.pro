@@ -31,12 +31,17 @@ FORMS += \
 
 include    ($$PWD/WIFI/WIFI.pri)
 include    ($$PWD/UI/UI.pri)
+include    ($$PWD/../Base/Base.pro)
+include    ($$PWD/../KTV/KTV.pro)
+include    ($$PWD/../MJson/MJson.pro)
+include    ($$PWD/../LOG/LOG.pro)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-LIBS += -L ~/myCat/executableProgram/Cat/lib -lBase
+#LIBS += -l pthread
+
 DESTDIR = ~/myCat/executableProgram/Cat
 

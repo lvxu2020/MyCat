@@ -5,10 +5,13 @@
 #include "./UI/WIFI/dialogscanmask.h"
 #include <vector>
 
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+class QListWidgetItem;
+class QListWidget;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -16,10 +19,11 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void clearQListWidget(QListWidget *,QList<QListWidgetItem*> &);
 signals:
     void sig_scanWIFI();
 private slots:
-    void slot_scanfOver();
+    void slot_scanfOver(bool);
 
     void on_WIFIScan_clicked();
 
@@ -31,5 +35,7 @@ private:
     Ui::MainWindow *ui;
     DialogScanMask *scanMask;
     void init();
+
+    QList<QListWidgetItem*> lstItem;
 };
 #endif // MAINWINDOW_H
