@@ -10,7 +10,7 @@
 //#define __WriteLogFile__     // 使能原始数据记录
 
 #define ENABLE_DEBUG_I_RECOD // 使能DEBUG_I记录
-//#define ENABLE_DEBUG_I_PRINT // 使能DEBUG_I输出
+#define ENABLE_DEBUG_I_PRINT // 使能DEBUG_I输出
 
 #if defined ENABLE_DEBUG_I_RECOD && defined ENABLE_DEBUG_I_PRINT
 #define DEBUG_I(format, ...) { std::string str; char dataStr[5000] = {}; char dataPos[1000] = {}; sprintf(dataStr, format, ##__VA_ARGS__); sprintf(dataPos, " -->%s:%d: [%s]\n", __FILE__,__LINE__,__FUNCTION__); str.append(dataStr).append(dataPos); LogRecoder::instance().insertLog("[DEBUG_I]", str); printf("DEBUG_I: %s %s", dataStr, dataPos); }
@@ -35,8 +35,8 @@
 #define DEBUG_W(format, ...)
 #endif
 
-#define ENABLE_DEBUG_E_RECOD // 使能DEBUG_E记录
-//#define ENABLE_DEBUG_E_PRINT // 使能DEBUG_E输出
+//#define ENABLE_DEBUG_E_RECOD // 使能DEBUG_E记录
+#define ENABLE_DEBUG_E_PRINT // 使能DEBUG_E输出
 
 #if defined ENABLE_DEBUG_E_RECOD && defined ENABLE_DEBUG_E_PRINT
 #define DEBUG_E(format, ...) { std::string str; char dataStr[5000] = {}; char dataPos[1000] = {}; sprintf(dataStr, format, ##__VA_ARGS__); sprintf(dataPos, " -->%s:%d: [%s]\n", __FILE__,__LINE__,__FUNCTION__); str.append(dataStr).append(dataPos); LogRecoder::instance().insertLog("[DEBUG_E]", str); printf("DEBUG_E: %s %s", dataStr, dataPos);}
@@ -48,7 +48,7 @@
 #define DEBUG_E(format, ...)
 #endif
 
-#define ENABLE_DEBUG_D_RECOD // 使能DEBUG_D记录
+//#define ENABLE_DEBUG_D_RECOD // 使能DEBUG_D记录
 //#define ENABLE_DEBUG_D_PRINT // 使能DEBUG_D输出
 
 #if defined ENABLE_DEBUG_D_RECOD && defined ENABLE_DEBUG_D_PRINT

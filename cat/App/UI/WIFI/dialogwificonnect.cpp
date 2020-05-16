@@ -683,13 +683,41 @@ void DialogWIFIConnect::on_btnConnect_clicked()
 }
 void DialogWIFIConnect::slot_connectWifi()
 {
-    system("rm /var/run/wpa_supplicant/wlan0");
-    system("wpa_cli terminate");
+    std::map<int,std::string>& configWifi = WIFI_Single::instance()->getWifiConfig();
+    QString command;
+    QByteArray command_c;
+    bool saved = false;
+    for(auto &map : configWifi){
+        if(map.second == WIFI_Single::instance()->getConnectingWIFI()){
+            command = "wpa_cli -i wlan0 select_network" + QString(map.first);
+            command_c = command.toLatin1();
+            system(command_c.data());
+            saved = true;
+        }
+    }
+    if(!saved){
+        command = "wpa_cli -i wlan0 add_network" ;
+        command_c = command.toLatin1();
+        system(command_c.data());
+        int i = configWifi.size();
+        command = "wpa_cli -i wlan0 set_network" + QString(i) + "ssid" + "\"" + \
+        QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()) +"\"";
+        command_c = command.toLatin1();
+        system(command_c.data());
+        command = "wpa_cli -i wlan0 set_network" + QString(i) + "psk" + "\"" + WIFIPwdStr +"\"";
+        command_c = command.toLatin1();
+        system(command_c.data());
+        command = "wpa_cli -i wlan0 enable_network" + QString(i);
+        command_c = command.toLatin1();
+        system(command_c.data());
+        command = "wpa_cli -i wlan0 save_config" ;
+        command_c = command.toLatin1();
+        system(command_c.data());
+    }
+    //QString 转换C 三步
     QString connect = "wpa_passphrase "+ QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()) \
      + " " + WIFIPwdStr + " > /home/debian/Cat/wifi.conf";
     QByteArray command = connect.toLatin1();
     system(command.data());
-    system(" wpa_supplicant -B -c wifi.conf -iwlan0 ");
-    system(" ifconfig wlan0 up ");
     connectUi->close();
 }

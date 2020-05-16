@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <vector>
 #include "../Base/base.h"
+#include <QString>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     scanMask = new DialogScanMask(this);
     connect(WIFI_Single::instance(),SIGNAL(sig_scanOver(bool)),this,SLOT(slot_scanfOver(bool)));
     connect(this,SIGNAL(sig_scanWIFI()),WIFI_Single::instance(),SLOT(slot_scanWIFI()));
-
+    connect(WIFI_Single::instance(),SIGNAL(sig_connectStatus(std::string)),this,SLOT(slot_wifiConnectChanged(std::string)));
     init();
 }
 
@@ -71,6 +72,18 @@ void MainWindow::slot_scanfOver( bool result){
     }
     mySleep(1000);
     scanMask->close();
+
+}
+
+void MainWindow::slot_wifiConnectChanged(std::string name)
+{
+   if(QString::fromStdString(name) == ""){
+        ui->WIFIConnect->setText("未连接");
+        ui->WIFIName->setText("");
+   }else{
+       ui->WIFIConnect->setText("已连接");
+       ui->WIFIName->setText(QString::fromStdString(name));
+   }
 
 }
 

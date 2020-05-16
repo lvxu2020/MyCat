@@ -24,7 +24,7 @@ signals:
     void sig_scanWIFI();
 private slots:
     void slot_scanfOver(bool);
-
+    void slot_wifiConnectChanged(std::string);
     void on_WIFIScan_clicked();
 
 
