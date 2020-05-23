@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QLabel" name="labConnection">
+  <widget class="QLabel" name="connectStatus">
    <property name="geometry">
     <rect>
      <x>230</x>

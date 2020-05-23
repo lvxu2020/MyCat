@@ -41,7 +41,6 @@ void WIFI::init()
 
 WIFI::~WIFI()
 {
-    mWifiNameVec.clear();
     delete scanBarTimer;
     delete mWifiMonitor;
 }
@@ -125,7 +124,6 @@ void WIFI::slot_scanOver(){
             data = "";
             send = "";
         }
-
         fileStream.close();
         break;
     }
@@ -159,7 +157,10 @@ void WIFI::slot_wifiMonitor()
         pclose(fp);
         fp = nullptr;
     }
-
+    if(!connected){
+        sig_connectStatus("");
+        return;
+    }
     //链接状态改变，触发信号
     if(mConnectedWifi != oldConnect){
         sig_connectStatus(mConnectedWifi);
@@ -179,7 +180,10 @@ void WIFI::slot_scanWIFI(){
 
 void WIFI::addWifiNameVec(const std::string str)
 {
-    DEBUG_I("addWifiNameVec: %s",str.c_str());
+    std::lock_guard<std::mutex> lck(mWifiNameVecMtx);
+    if(mWifiNameVec.size() >= 100){
+        mWifiNameVec.clear();
+    }
     mWifiNameVec.emplace_back(str);
 }
 

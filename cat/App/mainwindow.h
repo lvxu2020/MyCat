@@ -31,6 +31,8 @@ private slots:
 
     void on_listWIFI_clicked(const QModelIndex &index);
 
+    void on_connectWIFI_clicked();
+
 private:
     Ui::MainWindow *ui;
     DialogScanMask *scanMask;

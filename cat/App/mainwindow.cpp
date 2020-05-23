@@ -103,3 +103,8 @@ void MainWindow::on_listWIFI_clicked(const QModelIndex &index)
     dialog.exec();
 
 }
+
+void MainWindow::on_connectWIFI_clicked()
+{
+
+}

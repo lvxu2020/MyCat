@@ -14,7 +14,7 @@ class DialogConnectMask : public QDialog
 public:
     explicit DialogConnectMask(QWidget *parent = nullptr);
     ~DialogConnectMask();
-
+    void setConnectStatus(QString);
 private:
     Ui::DialogConnectMask *ui;
 };

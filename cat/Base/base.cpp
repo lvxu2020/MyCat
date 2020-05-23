@@ -34,3 +34,23 @@ std::vector<std::string> BaseSpace::mySplit(const std::string& in, const std::st
     };
 }
 
+// 用于QString类型的字符串 调用shall命令
+char* BaseSpace::qStringToC(QString& str)
+{
+    QByteArray c_str;
+    c_str = str.toLatin1();
+    return c_str.data();
+}
+//裁剪字符串左右侧留白
+const std::string WHITESPACE = " \n\r\t\f\v";
+std::string BaseSpace::trimStr(const std::string& str)
+{
+    size_t pos = str.find_first_not_of(WHITESPACE);
+    if(pos == std::string::npos){
+        return "";
+    }else{
+        pos = str.substr(pos).find_last_not_of(WHITESPACE);
+        return (pos == std::string::npos) ? "" : str.substr(0, pos + 1);
+    }
+}
+

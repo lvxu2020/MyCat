@@ -17,6 +17,10 @@ public:
     explicit DialogWIFIConnect(QWidget *parent = nullptr);
     ~DialogWIFIConnect();
     void setWIFIPwdStrLen(int);
+    void connectNewAccount();
+    void setVerifySsidPsk(QString ssid,QString psk,int);
+    void saveNowAccount();
+    void removeNowAccount();
 
 private slots:
     void on_btn_shift_clicked();
@@ -122,6 +126,8 @@ private slots:
     void on_btnConnect_clicked();
 
     void slot_connectWifi();
+
+    void slot_pskVerify();
 private:
     Ui::DialogWIFIConnect *ui;
     DialogConnectMask *connectUi = nullptr;
@@ -131,6 +137,12 @@ private:
     int WIFIPwdStrLen = 0;
 
     QTimer* connectTimer = nullptr;
+    //密码校验
+    QTimer* mPskVerifyTimer = nullptr;
+    std::string mSsid;
+    std::string mPsk;
+    std::string mNetId = "-1";
+
 };
 
 #endif // DIALOGWIFICONNECT_H

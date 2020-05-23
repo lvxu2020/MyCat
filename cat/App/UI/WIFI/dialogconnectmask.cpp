@@ -8,9 +8,15 @@ DialogConnectMask::DialogConnectMask(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(WIFI_Single::instance(),SIGNAL(sig_connectOver(bool)),this,SLOT());
+
 }
 
 DialogConnectMask::~DialogConnectMask()
 {
     delete ui;
+}
+
+void DialogConnectMask::setConnectStatus(QString txt)
+{
+    ui->connectStatus->setText(txt);
 }
