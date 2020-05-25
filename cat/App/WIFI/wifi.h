@@ -23,6 +23,7 @@ public:
     void setConnectingWIFI(std::string str);
     std::string getConnectingWIFI();
     std::map<int,std::string>& getWifiConfig();
+    void eraseWifiConfig(int);
 signals:
     void sig_scanOver(bool);
     void sig_connectOver(bool);

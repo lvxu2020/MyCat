@@ -691,25 +691,23 @@ void DialogWIFIConnect::slot_connectWifi()
 {
     std::map<int,std::string>& configWifi = WIFI_Single::instance()->getWifiConfig();
     QString command;
-    QByteArray command_c;
-    bool saved = false;
-    //wifi已保存在conf文件中，直接选择文件中的帐号密码进行链接，链接失败有提示
+    //wifi已保存在conf文件中，策略：将其删除从新链接
+    std::map<int,std::string>::iterator key;
     for(auto &map : configWifi){
         if(map.second == WIFI_Single::instance()->getConnectingWIFI()){
-            //将本次输入的密码链接
-            command = "wpa_cli -i wlan0 set_network " + QString(map.first) + " psk" + " \"" + WIFIPwdStr +"\"";
+            //将存档中的旧帐号密码删除
+            command = "wpa_cli -i wlan0 remove_network " + QString::number(map.first);
             system(qStringToC(command));
-            command = "wpa_cli -i wlan0 select_network " + QString(map.first);
-            setVerifySsidPsk(QString::fromStdString(map.second),WIFIPwdStr,map.first);
-            mySleep(2000);
-            mPskVerifyTimer->start();
-            saved = true;
+            DEBUG_I("%s",qStringToC(command));
+            key = configWifi.find(map.first);
         }
     }
-    //配置文件中没有存档，则添加链接。并保存进文件。没有校验密码是否正确，以后需要处理
-    if(!saved){
-        connectNewAccount();
+    //在循环中删除元素 会导致后面元素向前，使for循环崩溃
+    if(key != configWifi.end()){
+        configWifi.erase(key);
     }
+    //配置文件中没有存档，则添加链接。并保存进文件。没有校验密码是否正确，以后需要处理
+    connectNewAccount();
 }
 void DialogWIFIConnect::slot_pskVerify()
 {
@@ -799,6 +797,7 @@ void DialogWIFIConnect::connectNewAccount()
     WIFIPwdStr,atoi(mNetId.c_str()));
 
     mySleep(2000);
+    //开启校验timer
     mPskVerifyTimer->start();
 }
 
@@ -813,8 +812,11 @@ void DialogWIFIConnect::setVerifySsidPsk(QString ssid,QString psk,int id)
 void DialogWIFIConnect::saveNowAccount()
 {
     DEBUG_I("saveNowAccount  num : %s ssid : %s",mNetId.c_str(),mSsid.c_str());
-    system("wpa_cli -i wlan0 save_config");
+    if (WIFI_Single::instance()->WIFI::getWifiConfig().find(atoi(mNetId.c_str())) != WIFI_Single::instance()->WIFI::getWifiConfig().end()){
+        WIFI_Single::instance()->WIFI::getWifiConfig().erase(atoi(mNetId.c_str()));
+    }
     WIFI_Single::instance()->WIFI::getWifiConfig().insert(std::make_pair(atoi(mNetId.c_str()),mSsid));
+    system("wpa_cli -i wlan0 save_config");
     mSsid = "";
     mPsk = "";
     mNetId = "-1";

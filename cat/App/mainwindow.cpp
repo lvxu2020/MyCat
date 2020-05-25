@@ -77,13 +77,13 @@ void MainWindow::slot_scanfOver( bool result){
 
 void MainWindow::slot_wifiConnectChanged(std::string name)
 {
-   if(QString::fromStdString(name) == ""){
+    if(QString::fromStdString(name) == ""){
         ui->WIFIConnect->setText("未连接");
         ui->WIFIName->setText("");
-   }else{
+    }else{
        ui->WIFIConnect->setText("已连接");
        ui->WIFIName->setText(QString::fromStdString(name));
-   }
+    }
 
 }
 

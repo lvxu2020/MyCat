@@ -85,7 +85,14 @@ std::map<int,std::string>&  WIFI::getWifiConfig()
 {
     return mWifiConfig;
 }
+void WIFI::eraseWifiConfig(int num)
+{
+    std::map<int,std::string>::iterator key = mWifiConfig.find(num);
+    if(key != mWifiConfig.end()){
+        mWifiConfig.erase(key);
+    }
 
+}
 
 void WIFI::slot_scanOver(){
 
@@ -161,11 +168,12 @@ void WIFI::slot_wifiMonitor()
         sig_connectStatus("");
         return;
     }
-    //链接状态改变，触发信号
-    if(mConnectedWifi != oldConnect){
-        sig_connectStatus(mConnectedWifi);
-        oldConnect = mConnectedWifi;
-    }
+    sig_connectStatus(mConnectedWifi);
+//    //链接状态改变，触发信号
+//    if(mConnectedWifi != oldConnect){
+//        sig_connectStatus(mConnectedWifi);
+//        oldConnect = mConnectedWifi;
+//    }
 
 }
 
