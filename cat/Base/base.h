@@ -10,6 +10,8 @@ namespace BaseSpace{
     using namespace std;
     void mySleep(int );
     std::vector<std::string> mySplit(const std::string& in, const std::string& delim);
+    char* qStringToC(QString& );
+    std::string trimStr(const std::string& str);
 }
 using namespace BaseSpace;
 class Base : public QObject

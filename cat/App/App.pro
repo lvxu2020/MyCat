@@ -43,5 +43,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 #LIBS += -l pthread
 
-DESTDIR = ~/myCat/executableProgram/Cat
+DESTDIR = ~/qt_output/executableProgram/cat
 

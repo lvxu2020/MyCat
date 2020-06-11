@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <mutex>
 
 
 class WIFI : public QObject
@@ -22,6 +23,7 @@ public:
     void setConnectingWIFI(std::string str);
     std::string getConnectingWIFI();
     std::map<int,std::string>& getWifiConfig();
+    void eraseWifiConfig(int);
 signals:
     void sig_scanOver(bool);
     void sig_connectOver(bool);
@@ -41,6 +43,7 @@ private:
     std::string mConnectingWifi;
     std::string mConnectedWifi;
     std::map<int,std::string> mWifiConfig;
+    std::mutex mWifiNameVecMtx;
     friend class Singleton<WIFI>;
 };
 

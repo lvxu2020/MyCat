@@ -452,7 +452,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Backspace</string>
+    <string>Delete</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btn_a">

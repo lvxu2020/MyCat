@@ -41,7 +41,6 @@ void WIFI::init()
 
 WIFI::~WIFI()
 {
-    mWifiNameVec.clear();
     delete scanBarTimer;
     delete mWifiMonitor;
 }
@@ -86,7 +85,14 @@ std::map<int,std::string>&  WIFI::getWifiConfig()
 {
     return mWifiConfig;
 }
+void WIFI::eraseWifiConfig(int num)
+{
+    std::map<int,std::string>::iterator key = mWifiConfig.find(num);
+    if(key != mWifiConfig.end()){
+        mWifiConfig.erase(key);
+    }
 
+}
 
 void WIFI::slot_scanOver(){
 
@@ -125,7 +131,6 @@ void WIFI::slot_scanOver(){
             data = "";
             send = "";
         }
-
         fileStream.close();
         break;
     }
@@ -159,12 +164,17 @@ void WIFI::slot_wifiMonitor()
         pclose(fp);
         fp = nullptr;
     }
-
-    //链接状态改变，触发信号
-    if(mConnectedWifi != oldConnect){
-        sig_connectStatus(mConnectedWifi);
-        oldConnect = mConnectedWifi;
+    if(!connected){
+        sig_connectStatus("");
+        return;
     }
+    //每次校验都发信号 为解决有时连接已存在wifi状态不更新问题
+    sig_connectStatus(mConnectedWifi);
+//    //链接状态改变，触发信号
+//    if(mConnectedWifi != oldConnect){
+//        sig_connectStatus(mConnectedWifi);
+//        oldConnect = mConnectedWifi;
+//    }
 
 }
 
@@ -179,7 +189,10 @@ void WIFI::slot_scanWIFI(){
 
 void WIFI::addWifiNameVec(const std::string str)
 {
-    DEBUG_I("addWifiNameVec: %s",str.c_str());
+    std::lock_guard<std::mutex> lck(mWifiNameVecMtx);
+    if(mWifiNameVec.size() >= 100){
+        mWifiNameVec.clear();
+    }
     mWifiNameVec.emplace_back(str);
 }
 

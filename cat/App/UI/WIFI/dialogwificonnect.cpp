@@ -15,10 +15,16 @@ DialogWIFIConnect::DialogWIFIConnect(QWidget *parent) :
     ui->WIFIPwd->installEventFilter(this);
     setWIFIPwdStrLen(32);
     ui->WIFIName->setText(QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()));
+    //链接wifi线程
     connectTimer = new QTimer(this);
     connectTimer->setInterval(0);
-    connectTimer->setSingleShot(true);//触发一次
+    connectTimer->setSingleShot(true);//触发一次 true
     connect(connectTimer,SIGNAL(timeout()),this,SLOT(slot_connectWifi()));
+    //wifi密码校验
+    mPskVerifyTimer = new QTimer(this);
+    mPskVerifyTimer->setInterval(2000);
+    mPskVerifyTimer->setSingleShot(false);//触发一次 false
+    connect(mPskVerifyTimer,SIGNAL(timeout()),this,SLOT(slot_pskVerify()));
 }
 
 
@@ -685,39 +691,145 @@ void DialogWIFIConnect::slot_connectWifi()
 {
     std::map<int,std::string>& configWifi = WIFI_Single::instance()->getWifiConfig();
     QString command;
-    QByteArray command_c;
-    bool saved = false;
+    //wifi已保存在conf文件中，策略：将其删除从新链接
+    std::map<int,std::string>::iterator key;
     for(auto &map : configWifi){
         if(map.second == WIFI_Single::instance()->getConnectingWIFI()){
-            command = "wpa_cli -i wlan0 select_network" + QString(map.first);
-            command_c = command.toLatin1();
-            system(command_c.data());
-            saved = true;
+            //将存档中的旧帐号密码删除
+            command = "wpa_cli -i wlan0 remove_network " + QString::number(map.first);
+            system(qStringToC(command));
+            DEBUG_I("%s",qStringToC(command));
+            key = configWifi.find(map.first);
         }
     }
-    if(!saved){
-        command = "wpa_cli -i wlan0 add_network" ;
-        command_c = command.toLatin1();
-        system(command_c.data());
-        int i = configWifi.size();
-        command = "wpa_cli -i wlan0 set_network" + QString(i) + "ssid" + "\"" + \
-        QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()) +"\"";
-        command_c = command.toLatin1();
-        system(command_c.data());
-        command = "wpa_cli -i wlan0 set_network" + QString(i) + "psk" + "\"" + WIFIPwdStr +"\"";
-        command_c = command.toLatin1();
-        system(command_c.data());
-        command = "wpa_cli -i wlan0 enable_network" + QString(i);
-        command_c = command.toLatin1();
-        system(command_c.data());
-        command = "wpa_cli -i wlan0 save_config" ;
-        command_c = command.toLatin1();
-        system(command_c.data());
+    //在循环中删除元素 会导致后面元素向前，使for循环崩溃
+    if(key != configWifi.end()){
+        configWifi.erase(key);
     }
-    //QString 转换C 三步
-    QString connect = "wpa_passphrase "+ QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()) \
-     + " " + WIFIPwdStr + " > /home/debian/Cat/wifi.conf";
-    QByteArray command = connect.toLatin1();
-    system(command.data());
-    connectUi->close();
+    //配置文件中没有存档，则添加链接。并保存进文件。没有校验密码是否正确，以后需要处理
+    connectNewAccount();
+}
+void DialogWIFIConnect::slot_pskVerify()
+{
+    DEBUG_I("slot_pskVerify ssid is %s ",mSsid.c_str());
+    static int count = 0; // 设计验证三次 两秒一次
+    count++;
+    FILE *fp = nullptr;
+    char buf[256];
+    std::string data;
+    bool connected = false;
+    if((fp = popen("wpa_cli -i wlan0 list_networks","r")) != nullptr){
+        while(fgets(buf, 256, fp) != nullptr){
+            data = buf;
+            if(data.find(mSsid) != std::string::npos && data.find("[CURRENT]") != std::string::npos ){
+                connected = true;
+                DEBUG_D("%s",data.c_str());
+                break;
+            }
+            memset(buf,'0',256);
+        }
+        pclose(fp);
+        fp = nullptr;
+    }
+    if(connected){
+        count = 0;
+        connectUi->setConnectStatus("链接成功");
+        mySleep(1000);
+        saveNowAccount();
+        connectUi->close();
+        mPskVerifyTimer->stop();
+
+    }else{
+        if(count > 3){
+            count = 0;
+            connectUi->setConnectStatus("链接失败，请检查密码");
+            mPskVerifyTimer->stop();
+            removeNowAccount();
+            mySleep(1000);
+            connectUi->close();
+        }
+    }
+
+
+}
+
+void DialogWIFIConnect::connectNewAccount()
+{
+    //下部命令后要空格
+    QString command = "";
+    FILE *fp = nullptr;
+    char buf[15];
+    std::string data("");
+    //1.添加wpa网络
+    if((fp = popen("wpa_cli -i wlan0 add_network","r")) != nullptr){
+        while(fgets(buf, 15, fp) != nullptr){
+            data = buf;
+            if(data.find("FAIL") != std::string::npos  ){
+                return;
+            }else{
+                mNetId = buf;
+                mNetId = trimStr(mNetId);
+            }
+            memset(buf,'0',15);
+        }
+        pclose(fp);
+        fp = nullptr;
+    }
+    //2.帐号
+    command = "wpa_cli -i wlan0 set_network " + QString::fromStdString(mNetId)  + " ssid " + "'" +"\"" + \
+    QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()) +"\"" +"'";
+    DEBUG_I("%s",qStringToC(command));
+    system(qStringToC(command));
+    //3.密码
+    command = "wpa_cli -i wlan0 set_network " + QString::fromStdString(mNetId) + " psk " + "'" +"\"" + \
+    WIFIPwdStr +"\"" + "'";
+    DEBUG_I("%s",qStringToC(command));
+    system(qStringToC(command));
+    //4.使能网卡
+    command = "wpa_cli -i wlan0 enable_network " + QString::fromStdString(mNetId);
+    DEBUG_I("%s",qStringToC(command));
+    system(qStringToC(command));
+    //5.选择新加的网卡
+    command = "wpa_cli -i wlan0 select_network " + QString::fromStdString(mNetId);
+    DEBUG_I("%s",qStringToC(command));
+    system(qStringToC(command));
+    setVerifySsidPsk(QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()),\
+    WIFIPwdStr,atoi(mNetId.c_str()));
+
+    mySleep(2000);
+    //开启校验timer
+    mPskVerifyTimer->start();
+}
+
+void DialogWIFIConnect::setVerifySsidPsk(QString ssid,QString psk,int id)
+{
+    mSsid = ssid.toStdString();
+    mPsk = psk.toStdString();
+    mNetId = to_string(id);
+    DEBUG_I("ssid : %s ; psk : %s ; id : %s \n",ssid.toStdString().c_str(),psk.toStdString().c_str(),mNetId.c_str());
+}
+
+void DialogWIFIConnect::saveNowAccount()
+{
+    DEBUG_I("saveNowAccount  num : %s ssid : %s",mNetId.c_str(),mSsid.c_str());
+    if (WIFI_Single::instance()->WIFI::getWifiConfig().find(atoi(mNetId.c_str())) != WIFI_Single::instance()->WIFI::getWifiConfig().end()){
+        WIFI_Single::instance()->WIFI::getWifiConfig().erase(atoi(mNetId.c_str()));
+    }
+    WIFI_Single::instance()->WIFI::getWifiConfig().insert(std::make_pair(atoi(mNetId.c_str()),mSsid));
+    system("wpa_cli -i wlan0 save_config");
+    mSsid = "";
+    mPsk = "";
+    mNetId = "-1";
+}
+
+void DialogWIFIConnect::removeNowAccount()
+{
+    QString command;
+    command = "wpa_cli -i wlan0 remove_network " + QString::fromStdString(mNetId);
+    DEBUG_I("%s",qStringToC(command));
+    system(qStringToC(command));
+    system("wpa_cli -i wlan0 save_config");
+    mSsid = "";
+    mPsk = "";
+    mNetId = "-1";
 }
