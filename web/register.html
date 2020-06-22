@@ -1,16 +1,14 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>login</title>
+<title>register</title>
 <script src="js/jquery-2.2.3.min.js"></script>
 <script src="js/jquery-ui.min.js"></script>
 <link type="text/css" href="css/jquery-ui.min.css" rel="stylesheet">
+<link type="text/css" href="css/register.css" rel="stylesheet">
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <script src="js/bootstrap.min.js"></script>
-
-<link type="text/css" href="css/login.css" rel="stylesheet">
 <script src="js/my.js"></script>
 <SCRIPT language = "JavaScript">
     function checkUserName(){    //验证用户名
@@ -99,7 +97,7 @@
         document.myform.password.value="" ;
     }
 
-    //显示隐藏对应的密码输入框:
+    //显示隐藏对应的switchPwd()方法:
     $(function(){
         // 通过jqurey修改
         $("#passwordeye").click(function(){
@@ -110,30 +108,42 @@
                 $("#password").attr("type","password");
             }
         });
+        $("#passwordeye2").click(function(){
+            let type =  $("#password2").attr('type')
+            if(type === "password"){
+                $("#password2").attr("type","text");
+            }else{
+                $("#password2").attr("type","password");
+            }
+        });
     });
-
 
 </SCRIPT>
 </head>
 <body>
-<img src="img/login_bg.jpg" class="bg">
+<img src="img/register_bg.jpg" class="bg">
 
 <div id="center">
-<form name="myform" onSubmit="return validateform( )" enctype="multipart/form-data" action="cgi-bin/login.cgi" method="post" >
+<form name="myform" onSubmit="return validateform( )" enctype="multipart/form-data" action="cgi-bin/register.cgi" method="post" >
     <div class="input-group">
-        <h3>用户名：</h3> <input class="form-control" id="username" name="username" type="text"  style="height:40px" value="" placeholder="只能输入字母或数字，4-16个字符"/>
-    </div>
-    <div class="input-group">        
-        <h3>密   码：</h3> <input class="form-control" id="password" name="password" type="password" style="height:40px"  value="" placeholder="密码长度6-12位"/>
+        <h3>用  户  名：</h3><input class="form-control"  id="username" name="username" type="text"  style="height:40px" value=""  placeholder="只能输入字母或数字，4-16个字符"/>
+    </div>        
+    <div class="input-group">
+        <h3>密       码：</h3><input class="form-control"  id="password" name="password" type="password" style="height:40px" value=""  placeholder="密码长度6-12位"/>
         <span class="input-group-btn">
             <INPUT class="btn btn-default" id="passwordeye" type="button" value="show/hide"">
         </span>
     </div>
-
+    <div class="input-group">
+        <h3>确认密码：</h3><input class="form-control"  id="password2" name="password2" type="password" style="height:40px" value=""/>
+        <span class="input-group-btn">
+            <INPUT class="btn btn-default" id="passwordeye" type="button" value="show/hide"">
+        </span>
+    </div>     
     <div id="btn">
-        <INPUT class="btn btn-primary" name="loginButton" type="submit" id="Button" value="登陆"  onclick="checkUserName()">
-                        
-        <a href="register.html"><INPUT class="btn btn-primary" name="registerButton" id="Button" type="button" value="注册"></a>
+        <INPUT name="registerButton"  class="btn btn-primary" type="submit" id="Button" value="注册"  onclick="checkUserName()">
+                    
+        <a href="main.html"><INPUT  class="btn btn-primary" name="loginButton" id="Button" type="button" value="登录"></a>
     </div>
 </form>
 </div>

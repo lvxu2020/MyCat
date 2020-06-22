@@ -168,7 +168,10 @@ void WIFI::slot_wifiMonitor()
         sig_connectStatus("");
         return;
     }
+<<<<<<< HEAD
     //每次校验都发信号 为解决有时连接已存在wifi状态不更新问题
+=======
+>>>>>>> 7225d05399e88412ba61374c98e279bbe04b3367
     sig_connectStatus(mConnectedWifi);
 //    //链接状态改变，触发信号
 //    if(mConnectedWifi != oldConnect){
