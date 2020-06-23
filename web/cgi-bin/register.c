@@ -92,6 +92,7 @@ int main(int argc, char* argv[])
     char *method = NULL;
     char name[50],pwd[20];
 
+
     //获取HTTP请求方法(POST/GET)
     if (NULL == (method = getenv("REQUEST_METHOD")))
     {
