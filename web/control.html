@@ -1,11 +1,31 @@
 <html>
  <head>
- <title>Test</title>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ <title>命令下发</title>
+ <script>
+ function show()
+ {
+ var date =new Date();
+ var now = ""; 
+ now = date.getFullYear()+"年"; 
+ now = now + (date.getMonth()+1)+"月"; 
+ now = now + date.getDate()+"日"; 
+ now = now + date.getHours()+"时"; 
+ now = now + date.getMinutes()+"分";
+ now = now + date.getSeconds()+"秒"; 
+ document.getElementById("nowDiv").innerHTML = now; 
+ setTimeout("show()",1000);
+ }
+ </script> 
  </head>
 <body>
-  <form action="cgi-bin/out.cgi" method="get">
+	<h2><font face="Broadway"><font color="#00FAF0">欢迎使用远程控制</font></font></H2>
+	<h2 align=center><font color="#cc0033"><body onload="show()"> <div id="nowDiv"></div></font></h2>
+	
+	<form action="cgi-bin/control.cgi" method="get">
      <input type="checkbox" name="stitcw" value="Bike">start<br><br>
      <input type="submit" value="提交 &rarr;">
     </form>
+	
  </body>
  </html>
