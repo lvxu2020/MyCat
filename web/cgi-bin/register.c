@@ -2,10 +2,11 @@
 #include <sqlite3.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #define TABLE "USER_PASS"
 #define USER_DB_PATH "/home/lvxu/net/ku1.db"
-#include <stdbool.h>
+
 
 bool found = false;
 

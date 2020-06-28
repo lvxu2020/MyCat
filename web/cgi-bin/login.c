@@ -73,6 +73,8 @@ int main()
     char name[50],pwd[20];   
     printf("content-type:text/html;charset=utf-8\n\n");  
     printf("<TITLE>登陆结果</TITLE>");  
+    printf("<script src=\"js/jquery-3.0.0.min.js\"></script>");
+    printf("<script src=\"js/jquery.params.js\"></script>");
 //    printf( "<script>function show(){var date =new Date(); var now = \"\"; now = date.getFullYear()+\"年\"; now = now + (date.getMonth()+1)+\"月\"; \ now = now + date.getDate()+\"日\"; now = now + date.getHours()+\"时\"; now = now + date.getMinutes()+\"分\";now = now + date.getSeconds()+\"秒\"; document.getElementById(\"nowDiv\").innerHTML = now; setTimeout(\"show()\",1000);} </script> \n ");
 //    printf( "<h2><font face=\"Broadway\"><font color=\"#00FAF0\">Home1 Real-time Environment Info:</font></font></H2>\n ");
 //    printf( "<h2 align=center><font color=\"#cc0033\"><body onload=\"show()\"> <div id=\"nowDiv\"></div></font></h2> \n ");
@@ -91,8 +93,8 @@ int main()
             memset((void*)inputdata,0,length);
             //从标准输入读取一定数据
             fread(inputdata, sizeof(char), length, stdin);
-            getNamePwd(inputdata,length,name,pwd);
             //读出帐号密码
+            getNamePwd(inputdata,length,name,pwd);
             free(inputdata);
         }
     }else if (getenv("QUERY_STRING") && strcmp(method,"GET") == 0){
@@ -137,7 +139,7 @@ int main()
     }
     if(checked){
         printf("<H3>登录成功</h3>");
-        printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/control.html\">");
+        printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/control.html?usr=%s\">",name);
     }else{
         printf("<H3>帐号密码错误</h3>");
         printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/main.html\">");

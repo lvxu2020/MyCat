@@ -3,46 +3,36 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define COMMAND_MAX 1
 
 /* ***********
- * 截取帐号密码
+ * 任务处理
  * ***********/
-bool getNamePwd(const char *data, int len, char *name, char *pwd)
+bool addQueue(int num,int cmd)
 {
-    int i;
-    bool find_name = false,find_pwd = false;
-    for (i=0; i < len; i++) {
-        if (data[i] == '"' ) {
-            if (!find_name && 0 == strncmp(data+(i+1),"username",8) ) {
-                int j = 0;
-                for (;;j++) {
-                    if(data[i+14+j] == 13 || j > 49){
-                        name[j]  = '\0';
-                        find_name = true;
-                        break;
-                    }
-                    name[j] = (char)data[i+14+j];
+    printf("+++mun : %d,cmd : %d",num,cmd);
+}
 
-                }
-                i += j;
-            }
+/* ***********
+ * 获取命令
+ * ***********/
+bool getCommand(char * data,char (*cmd)[50],int len)
+{
+    if(len > 0){
+        sscanf(data,"stitcw=%[^=]",cmd[0]);
 
-            if ( !find_pwd && 0 == strncmp(data+i+1,"password",8) ) {
-                int k = 0;
-                for (;;k++) {
-
-                    if(data[i+14+k] == 13 || k > 19){
-                        pwd[k] = '\0';
-                        find_pwd = true;
-                        break;
-                    }
-                    pwd[k] = data[i+14+k];
-                }
-                return true;
-            }
-        }
     }
-    return false;
+    return len > 0 ? false : true;
+}
+
+/* ***********
+ * 任务处理
+ * ***********/
+void processTask(char (*cmd)[50])
+{
+    if(strcmp(cmd[0],"start") == 0){
+        addQueue(1,0);
+    }
 
 }
 
@@ -51,8 +41,7 @@ int main()
     //web
     size_t i = 0,n = 0;
     char *method = NULL;
-    char name[50],pwd[20];
-
+    char command[COMMAND_MAX][50] = {0};
     //获取HTTP请求方法(POST/GET)
     if (NULL == (method = getenv("REQUEST_METHOD")))
     {
@@ -70,8 +59,8 @@ int main()
             memset((void*)inputdata,0,length);
             //从标准输入读取一定数据
             fread(inputdata, sizeof(char), length, stdin);
-            getNamePwd(inputdata,length,name,pwd);
-            //读出帐号密码
+            //获取命令
+            getCommand(inputdata,command,length);
             free(inputdata);
         }
     }else if (getenv("QUERY_STRING") && strcmp(method,"GET") == 0){
@@ -80,7 +69,10 @@ int main()
         if (inputdata == NULL){
             printf("<p>错误：数据没有被输入或数据传输发生错误</p>");
         }else{
+            int length = strlen(inputdata);
             printf("+len = %d++%s+++",strlen(inputdata),inputdata);
+            //获取命令
+            getCommand(inputdata,command,length);
          //   sscanf(inputdata,"username=%[^&]&password=%s",name,pwd);
         }
 
@@ -88,5 +80,8 @@ int main()
           printf("%s\n","bad request!");
           return 0;
     }
+    //任务处理
+    processTask(command);
+    printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/control.html\">");
 
 }
