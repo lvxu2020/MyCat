@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #define TABLE "USER_PASS"
-#define USER_DB_PATH "/home/lvxu/net/ku1.db"
+#define USER_DB_PATH "/home/lvxu/net/lvxu.db"
 
 
 bool checked = false;
@@ -17,21 +17,35 @@ int check(void *para,int ncolumn, char ** columnvalue,char *columnname[])
 {
     int i;
     char (*p)[50] = (char(*)[50])para;
-    if( 0 == strcmp(columnvalue[0],p[0]) && 0 == strcmp(columnvalue[1],p[1])){
+    if( 0 == strcmp(columnvalue[0],p[0]) && 0 == strcmp(columnvalue[1],p[1]) && 0 == strcmp(columnvalue[2],p[2]) ){
         checked = true;
     }
     return 0;
 }
 
 /* ***********
- * 截取帐号密码
+ * 截取帐号密码设备号
  * ***********/
-bool getNamePwd(const char *data, int len, char *name, char *pwd)
+bool getNamePwdNum(const char *data, int len, char *name, char *pwd, char *num)
 {
     int i;
-    bool find_name = false,find_pwd = false;
+    bool find_name = false,find_pwd = false,find_num = false;
     for (i=0; i < len; i++) {
         if (data[i] == '"' ) {
+            if (!find_num && 0 == strncmp(data+(i+1),"number",6) ) {
+                int j = 0;
+                for (;;j++) {
+                    if(data[i+12+j] == 13 || j > 9){
+                        num[j]  = '\0';
+                        find_num = true;
+                        break;
+                    }
+                    num[j] = (char)data[i+12+j];
+
+                }
+                i += j;
+            }
+
             if (!find_name && 0 == strncmp(data+(i+1),"username",8) ) {
                 int j = 0;
                 for (;;j++) {
@@ -70,7 +84,7 @@ int main()
     //web
     size_t i = 0,n = 0;
     char *method = NULL;
-    char name[50],pwd[20];   
+    char num[10],name[50],pwd[20];
     printf("content-type:text/html;charset=utf-8\n\n");  
     printf("<TITLE>登陆结果</TITLE>");  
     printf("<script src=\"js/jquery-3.0.0.min.js\"></script>");
@@ -94,7 +108,7 @@ int main()
             //从标准输入读取一定数据
             fread(inputdata, sizeof(char), length, stdin);
             //读出帐号密码
-            getNamePwd(inputdata,length,name,pwd);
+            getNamePwdNum(inputdata,length,name,pwd,num);
             free(inputdata);
         }
     }else if (getenv("QUERY_STRING") && strcmp(method,"GET") == 0){
@@ -119,9 +133,10 @@ int main()
     int row,col;
     const char *sqlcmd;
     char insert[128];
-    char  account[2][50] = {0};
-    strcpy(account[0],name);
-    strcpy(account[1],pwd);
+    char  account[3][50] = {0};
+    strcpy(account[0],num);
+    strcpy(account[1],name);
+    strcpy(account[2],pwd);
     //打开数据库
     res = sqlite3_open(USER_DB_PATH, &db);
     if(res != SQLITE_OK){
@@ -139,7 +154,7 @@ int main()
     }
     if(checked){
         printf("<H3>登录成功</h3>");
-        printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/control.html?usr=%s\">",name);
+        printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/control.html?num=%s\">",num);
     }else{
         printf("<H3>帐号密码错误</h3>");
         printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/main.html\">");

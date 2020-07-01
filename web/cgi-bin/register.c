@@ -3,12 +3,26 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <strings.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
 
 #define TABLE "USER_PASS"
-#define USER_DB_PATH "/home/lvxu/net/ku1.db"
+#define USER_DB_PATH "/home/lvxu/net/lvxu.db"
+#define USER_CONF_PATH "/home/lvxu/usr"
+#define SHM_MAX 128
+#define SHM_CHECK_OK "yes"
 
 
 bool found = false;
+
+int semaphore_p(int semId);
+int semaphore_v(int semId);
 
 /* ***********
  * 查找特定元素
@@ -29,8 +43,6 @@ int find(void *para,int ncolumn, char ** columnvalue,char *columnname[])
  * ***********/
 void usrRegistered()
 {
-//    printf("content-type:text/html;charset=utf-8\n\n");
-//    printf("<TITLE>登陆结果</TITLE>");
     printf("<H3>用户名已被注册！</h3>");
     printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/register.html\">");
 }
@@ -38,21 +50,95 @@ void usrRegistered()
 /* ***********
  * 新用户添加
  * ***********/
-void newUsr(char *name,char *pwd)
+bool newUsr(char *name, char *pwd, char *num)
 {
-    printf("<H3>注册成功，稍候返回登录界面</h3>");
-    printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/main.html\">");
+    char file[100] = {0};
+    char *shmBuf = NULL;
+    bool send = true;
+    sprintf(file,"%s/%s/%s.conf",USER_CONF_PATH,name,num);
+    //申请操作共享内存信号量
+    key_t key = ftok("/",'a');
+    int sem_req_shm = semget(key,1,O_RDWR);
+    if(sem_req_shm < 0){
+        return false;
+    }
+    key = ftok("/bin",'b');
+    int sem_task = semget(key,1,O_RDWR);
+    if(sem_task < 0){
+        return false;
+    }
+    key = ftok("/bin",'c');
+    int sem_return = semget(key,1,O_RDWR);
+    if(sem_return < 0){
+        return false;
+    }
+    //P操作 防止其他cgi程序同时操作共享内存。
+    semaphore_p(sem_req_shm);
+
+
+    //打开共享内存
+    key = ftok("/bin",'d');
+    int shmid = shmget(key,0,0);
+    if(shmid < 0)
+    {
+        send = false;
+        break;
+    }
+    shmBuf = shmat(shmid,NULL,0);
+    if(shmBuf == NULL)
+    {
+        send = false;
+        break;
+    }
+
+    //写入命令释放信号量
+    bzero(shmBuf,SHM_MAX);
+    strcpy(shmBuf,file);
+    semaphore_v(sem_task);
+    //等待服务器端返回处理结果
+    semaphore_p(sem_return);
+    char recvBuf[10] = {0};
+    strcpy(recvBuf,shmBuf);
+    if ( strcmp(recvBuf,SHM_CHECK_OK) ) {
+        send = false;
+    }
+    //V操作 V操作释放掉信号量。程序消亡会自动释放。但我们是好孩子，自己动手
+    semaphore_v(sem_req_shm);
+    if(send){
+        printf("<H3>注册成功，稍候返回登录界面</h3>");
+        printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/main.html\">");
+        return true;
+    }else{
+        printf("<H3>开创用户目录失败，稍候返回注册界面</h3>");
+        printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/register.html\">");
+        return false;
+    }
+
 }
 
 /* ***********
- * 截取帐号密码
+ * 截取帐号密码设备号
  * ***********/
-bool getNamePwd(const char *data, int len, char *name, char *pwd)
+bool getNamePwdNum(const char *data, int len, char *name, char *pwd, char *num)
 {
     int i;
-    bool find_name = false,find_pwd = false;
+    bool find_name = false,find_pwd = false,find_num = false;
     for (i=0; i < len; i++) {
         if (data[i] == '"' ) {
+            if (!find_num && 0 == strncmp(data+(i+1),"number",6) ) {
+                int j = 0;
+                for (;;j++) {
+                    if(data[i+12+j] == 13 || j > 9){
+                        num[j]  = '\0';
+                        find_num = true;
+                        break;
+                    }
+                    num[j] = (char)data[i+12+j];
+
+                }
+                i += j;
+            }
+
             if (!find_name && 0 == strncmp(data+(i+1),"username",8) ) {
                 int j = 0;
                 for (;;j++) {
@@ -91,7 +177,7 @@ int main(int argc, char* argv[])
     //web
     size_t i = 0,n = 0;
     char *method = NULL;
-    char name[50],pwd[20];
+    char name[50],pwd[20],num[10];
 
 
     //获取HTTP请求方法(POST/GET)
@@ -111,7 +197,7 @@ int main(int argc, char* argv[])
             memset((void*)inputdata,0,length);
             //从标准输入读取一定数据
             fread(inputdata, sizeof(char), length, stdin);
-            getNamePwd(inputdata,length,name,pwd);
+            getNamePwdNum(inputdata,length,name,pwd,num);
             //读出帐号密码
             free(inputdata);
         }
@@ -161,7 +247,7 @@ int main(int argc, char* argv[])
         usrRegistered();
     }else{//添加进数据库
         memset((void*)insert,0,sizeof(insert));
-        sprintf(insert,"INSERT INTO %s VALUES ('%s','%s') ;",TABLE,name,pwd);
+        sprintf(insert,"INSERT INTO %s VALUES ('%s','%s','%s') ;",TABLE,num,name,pwd);
         sqlcmd = insert;
         res = sqlite3_exec(db,sqlcmd,NULL,0,&errmsg);//插入数据
         if(res!=SQLITE_OK){
@@ -169,7 +255,12 @@ int main(int argc, char* argv[])
             sqlite3_close(db);
             return 0;
         }else{
-            newUsr(name,pwd);
+            if (!newUsr(name,pwd,num)){
+               char delete[120];
+               sprintf(delete,"DELETE from USER_PASS where num=%s;",num);
+               sqlcmd = delete;
+               res = sqlite3_exec(db,sqlcmd,NULL,0,&errmsg);//删除数据
+            }
         }
 
     }
@@ -177,3 +268,33 @@ int main(int argc, char* argv[])
    sqlite3_close(db);
 
 }
+
+int semaphore_p(int semId)
+{
+    //对信号量做减1操作，即等待P（sv）
+    struct sembuf sem_b;
+    sem_b.sem_num = 0;
+    sem_b.sem_op = -1;//P()
+    sem_b.sem_flg = SEM_UNDO;
+    if(semop(semId, &sem_b, 1) == -1){
+        fprintf(stderr, "semaphore_p failed\n");
+        return 0;
+    }
+    return 1;
+}
+
+int semaphore_v(int semId)
+{
+    //对信号量做加1操作，即释放信号量V（sv）
+    struct sembuf sem_b;
+    sem_b.sem_num = 0;
+    sem_b.sem_op = 1;//P()
+    sem_b.sem_flg = SEM_UNDO;
+    if(semop(semId, &sem_b, 1) == -1){
+        fprintf(stderr, "semaphore_p failed\n");
+        return 0;
+    }
+    return 1;
+
+}
+
