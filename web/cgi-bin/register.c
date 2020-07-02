@@ -54,7 +54,6 @@ bool newUsr(char *name, char *pwd, char *num)
 {
     char file[100] = {0};
     char *shmBuf = NULL;
-    bool send = true;
     sprintf(file,"%s/%s/%s.conf",USER_CONF_PATH,name,num);
     //申请操作共享内存信号量
     key_t key = ftok("/",'a');
@@ -81,13 +80,13 @@ bool newUsr(char *name, char *pwd, char *num)
     int shmid = shmget(key,0,0);
     if(shmid < 0)
     {
-        send = false;
+        return false;
         break;
     }
     shmBuf = shmat(shmid,NULL,0);
     if(shmBuf == NULL)
     {
-        send = false;
+        return false;
         break;
     }
 
@@ -100,20 +99,10 @@ bool newUsr(char *name, char *pwd, char *num)
     char recvBuf[10] = {0};
     strcpy(recvBuf,shmBuf);
     if ( strcmp(recvBuf,SHM_CHECK_OK) ) {
-        send = false;
+        return false;
     }
     //V操作 V操作释放掉信号量。程序消亡会自动释放。但我们是好孩子，自己动手
     semaphore_v(sem_req_shm);
-    if(send){
-        printf("<H3>注册成功，稍候返回登录界面</h3>");
-        printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/main.html\">");
-        return true;
-    }else{
-        printf("<H3>开创用户目录失败，稍候返回注册界面</h3>");
-        printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/register.html\">");
-        return false;
-    }
-
 }
 
 /* ***********
@@ -245,22 +234,24 @@ int main(int argc, char* argv[])
 
     if(found){
         usrRegistered();
-    }else{//添加进数据库
-        memset((void*)insert,0,sizeof(insert));
-        sprintf(insert,"INSERT INTO %s VALUES ('%s','%s','%s') ;",TABLE,num,name,pwd);
-        sqlcmd = insert;
-        res = sqlite3_exec(db,sqlcmd,NULL,0,&errmsg);//插入数据
-        if(res!=SQLITE_OK){
-            printf("数据库操作失败：%d-%s\n",res,errmsg);
-            sqlite3_close(db);
-            return 0;
-        }else{
-            if (!newUsr(name,pwd,num)){
-               char delete[120];
-               sprintf(delete,"DELETE from USER_PASS where num=%s;",num);
-               sqlcmd = delete;
-               res = sqlite3_exec(db,sqlcmd,NULL,0,&errmsg);//删除数据
+    }else{//添加进数据库        
+        if (newUsr(name,pwd,num)){
+            memset((void*)insert,0,sizeof(insert));
+            sprintf(insert,"INSERT INTO %s VALUES ('%s','%s','%s') ;",TABLE,num,name,pwd);
+            sqlcmd = insert;
+            res = sqlite3_exec(db,sqlcmd,NULL,0,&errmsg);//插入数据
+            if(res!=SQLITE_OK){
+                printf("数据库操作失败：%d-%s\n",res,errmsg);
+                sqlite3_close(db);
+                return 0;
+            }else{
+                printf("<H3>注册成功，稍候返回登录界面</h3>");
+                printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/main.html\">");
             }
+
+        }else{
+            printf("<H3>开创用户目录失败，稍候返回注册界面</h3>");
+            printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/register.html\">");
         }
 
     }

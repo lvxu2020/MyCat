@@ -3,7 +3,29 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include <sys/ipc.h>
+#include <strings.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/msg.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 #define COMMAND_MAX 1
+#define MQ_KEY_PATH "/lib"
+#define MQ_KEY_CHAR 'A'
+#define MQ_MSGBUF_LEN 50
+
+typedef struct mqbuf
+{
+        long type;
+        char msg[MQ_MSGBUF_LEN];
+}MSG;
 
 /* ***********
  * 任务处理
@@ -28,11 +50,18 @@ bool getCommand(char * data,char (*cmd)[50],int len)
 /* ***********
  * 任务处理
  * ***********/
-void processTask(char (*cmd)[50])
+void processTask(char *task)
 {
-    if(strcmp(cmd[0],"start") == 0){
-        addQueue(1,0);
-    }
+//    if(strcmp(cmd[0],"start") == 0){
+//        addQueue(1,0);
+//    }
+    key_t key = ftok(MQ_KEY_PATH,MQ_KEY_CHAR);
+    int msgid = msgget(key,O_RDWR);
+    MSG buf;
+    bzero(&buf,sizeof(buf));
+    buf.type = 3;
+    strcpy(buf.msg,task);
+    msgsnd(msgid,&buf,MQ_MSGBUF_LEN,0);
 
 }
 
@@ -73,6 +102,7 @@ int main()
             printf("+len = %d++%s+++",strlen(inputdata),inputdata);
             //获取命令
             getCommand(inputdata,command,length);
+            processTask(inputdata);
          //   sscanf(inputdata,"username=%[^&]&password=%s",name,pwd);
         }
 
@@ -80,8 +110,8 @@ int main()
           printf("%s\n","bad request!");
           return 0;
     }
-    //任务处理
-    processTask(command);
+//    //任务处理
+//    processTask(command);
     printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/control.html\">");
 
 }
