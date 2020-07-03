@@ -52,9 +52,7 @@ bool getCommand(char * data,char (*cmd)[50],int len)
  * ***********/
 void processTask(char *task)
 {
-//    if(strcmp(cmd[0],"start") == 0){
-//        addQueue(1,0);
-//    }
+
     key_t key = ftok(MQ_KEY_PATH,MQ_KEY_CHAR);
     int msgid = msgget(key,O_RDWR);
     MSG buf;
@@ -69,6 +67,7 @@ int main()
 {
     //web
     size_t i = 0,n = 0;
+    char num[10] = {"0"};
     char *method = NULL;
     char command[COMMAND_MAX][50] = {0};
     //获取HTTP请求方法(POST/GET)
@@ -112,6 +111,6 @@ int main()
     }
 //    //任务处理
 //    processTask(command);
-    printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/control.html\">");
+    printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/control.html?num=%s\">",num);
 
 }

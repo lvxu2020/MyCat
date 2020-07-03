@@ -11,6 +11,7 @@
 #include <strings.h>
 #include <sys/shm.h>
 #include <sys/sem.h>
+#include <signal.h>
 
 #define TABLE "USER_PASS"
 #define USER_DB_PATH "/home/lvxu/net/lvxu.db"
@@ -81,13 +82,11 @@ bool newUsr(char *name, char *pwd, char *num)
     if(shmid < 0)
     {
         return false;
-        break;
     }
     shmBuf = shmat(shmid,NULL,0);
     if(shmBuf == NULL)
     {
         return false;
-        break;
     }
 
     //写入命令释放信号量
@@ -163,6 +162,7 @@ bool getNamePwdNum(const char *data, int len, char *name, char *pwd, char *num)
 
 int main(int argc, char* argv[])
 {
+
     //web
     size_t i = 0,n = 0;
     char *method = NULL;
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
 
     if(found){
         usrRegistered();
-    }else{//添加进数据库        
+    }else{//添加进数据库
         if (newUsr(name,pwd,num)){
             memset((void*)insert,0,sizeof(insert));
             sprintf(insert,"INSERT INTO %s VALUES ('%s','%s','%s') ;",TABLE,num,name,pwd);
@@ -252,11 +252,17 @@ int main(int argc, char* argv[])
         }else{
             printf("<H3>开创用户目录失败，稍候返回注册界面</h3>");
             printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/register.html\">");
+            sqlite3_close(db);
+            return 0;
+
         }
 
     }
 
-   sqlite3_close(db);
+    sqlite3_close(db);
+    return 0;
+
+
 
 }
 

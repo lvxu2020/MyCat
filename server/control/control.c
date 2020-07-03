@@ -1,3 +1,4 @@
+#include "control.h"
 #include <sys/ipc.h>
 #include <strings.h>
 #include <sys/shm.h>
@@ -11,20 +12,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define MQ_KEY_PATH "/lib"
-#define MQ_KEY_CHAR 'A'
-#define MQ_MSGBUF_LEN 50
 
-typedef struct mqbuf
-{
-        long type;
-        char msg[MQ_MSGBUF_LEN];
-}MSG;
-
-int getMqId(char *path,char ch);
-int processTask(MSG *p);
-
-int main()
+void * remoteCmd(void *p)
 {
    int recId = getMqId(MQ_KEY_PATH,MQ_KEY_CHAR);
    if (recId < 0) {
@@ -32,7 +21,7 @@ int main()
    }
    MSG recBuf;
    int n;
-   printf("i start rec\n");
+   printf("queue start !!!\n");
    while (1) {
         n = msgrcv(recId,&recBuf,MQ_MSGBUF_LEN,0,0);
         if (n != -1){

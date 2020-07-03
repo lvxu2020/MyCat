@@ -1,3 +1,4 @@
+#include "register.h"
 #include <sys/ipc.h>
 #include <strings.h>
 #include <sys/shm.h>
@@ -10,9 +11,9 @@
 #include <sys/sem.h>
 #include <stdbool.h>
 
-#define SHM_MAX 128
-#define SHM_TASK_TRTURN_OK 6
-#define SHM_CHECK_OK "yes"
+
+
+
 
 union semun
 {
@@ -21,17 +22,13 @@ union semun
     unsigned short *arry;
 };
 
-int semaphore_p(int semId);
-int semaphore_v(int semId);
-int getSemId(char *path,char ch);
-int analysis(char *buf);
 
-int main()
+void * registerUsr(void *p)
 {
     //信号量
 
     //创建信号量 用于cgi向服务器申请操作共享内存
-    int sem_req_shm = getSemId("/",'a');
+    int sem_req_shm = getSemId(SEM_REQ_SHM_PATH,SEM_REQ_SHM_CHAR);
     if(sem_req_shm < 0)
     {
         perror("semget");
@@ -43,7 +40,7 @@ int main()
     }
 
     //创建信号量 用于cgi向共享内存写入任务
-    int sem_task = getSemId("/bin",'b');
+    int sem_task = getSemId(SEM_CGIWRITE_PATH,SEM_CGIWRITE_CHAR);
     if(sem_task < 0)
     {
         perror("semget");
@@ -57,7 +54,7 @@ int main()
     semaphore_p(sem_task);
 
     //创建信号量 用于服务器回应cgi任务处理的结果
-    int sem_return = getSemId("/bin",'c');
+    int sem_return = getSemId(SEM_RETURNCGI_PATH,SEM_RETURNCGI_CHAR);
     if(sem_return < 0)
     {
         perror("semget");
@@ -71,7 +68,7 @@ int main()
 
     //共享内存
     char buffer[128] = {0};
-    key_t key = ftok("/bin",'d');
+    key_t key = ftok(SHM_PATH,SHM_CHAR);
     int shmid = shmget(key,0,0);
     if (shmid > 0) {//存在旧内存删掉
         shmctl(shmid,IPC_RMID,0);
@@ -87,7 +84,7 @@ int main()
         perror("shmat");
         return -1;
     }
-    printf("11111111111111\n");
+    printf("shm start\n");
     bool first = true;
     while (1) {
 
@@ -100,10 +97,7 @@ int main()
         */
         semaphore_p(sem_return);
         //等待cgi写入任务
-
         semaphore_p(sem_task);
-
-        printf("222222222222222\n");
         memset(buffer,0,sizeof(buffer));
         if (strlen(shmBuf) != 0) {
             strcpy(buffer,shmBuf);
@@ -111,9 +105,9 @@ int main()
             if(res == SHM_TASK_TRTURN_OK){
                 bzero(shmBuf,SHM_MAX);
                 strcpy(shmBuf,SHM_CHECK_OK);
-                printf("send:%s\n",shmBuf);
+//                printf("send:%s\n",shmBuf);
             }
-            printf("recv:%s\n",buffer);
+//            printf("recv:%s\n",buffer);
 
         }else{
             strcpy(shmBuf,"0");
@@ -124,7 +118,6 @@ int main()
         * 信号量。同步是安全的
         */
         semaphore_v(sem_return);
-        printf("la la la ~ ~ ~\n");
     }
 
     return 0;
@@ -152,7 +145,6 @@ int semaphore_v(int semId)
     sem_b.sem_op = 1;//P()
     sem_b.sem_flg = SEM_UNDO;
     if(semop(semId, &sem_b, 1) == -1){
-        fprintf(stderr, "semaphore_p failed\n");
         return 0;
     }
     return 1;
@@ -196,4 +188,3 @@ int analysis(char *buf)
         }
     }
 }
-
