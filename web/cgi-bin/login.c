@@ -154,10 +154,10 @@ int main()
     }
     if(checked){
         printf("<H3>登录成功</h3>");
-        printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/control.html?num=%s\">",num);
+        printf("<meta http-equiv=\"Refresh\" content=\"1;URL=/control.html?num=%s\">",num);
     }else{
         printf("<H3>帐号密码错误</h3>");
-        printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/main.html\">");
+        printf("<meta http-equiv=\"Refresh\" content=\"2;URL=/main.html\">");
     }
 
     return 0; 
