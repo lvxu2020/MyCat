@@ -3,7 +3,7 @@
 #CFLAGS=-Wall -g -lstdc++ -pthread -l dbus-1 -w
 CC=gcc
 CFLAGS=-Wall -g  -pthread  -w
-
+LIBS = -l paho-mqtt3c
 
 BIN=server
 
@@ -16,7 +16,7 @@ SUBSRC=$(shell find $(SUBDIR) -name '*.c')
 SUBOBJ=$(SUBSRC:%.c=%.o)
 
 $(BIN):$(ROOTOBJ) $(SUBOBJ)
-	$(CC) $(CFLAGS) $(APPINCLUDE) $(ROOTOBJ) $(SUBOBJ) -o $(BIN)
+	$(CC) $(CFLAGS)   $(APPINCLUDE) $(ROOTOBJ) $(SUBOBJ) -o $(BIN) $(LIBS)
 .c.o:
 	$(CC) $(CFLAGS) $(APPINCLUDE) -c $< -o $@
 clean:
