@@ -1,21 +1,11 @@
 #include "control.h"
-#include <sys/ipc.h>
-#include <strings.h>
-#include <sys/shm.h>
-#include <sys/types.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <sys/msg.h>
-#include <unistd.h>
-#include <fcntl.h>
 
+myQueue *sendQ_ptr = NULL;
 
 void * remoteCmd(void *p)
 {
    int recId = getMqId(MQ_KEY_PATH,MQ_KEY_CHAR);
+   sendQ_ptr = getQueue();
    if (recId < 0) {
        return -1;
    }
@@ -46,5 +36,12 @@ int getMqId(char *path,char ch)
 
 int processTask(MSG *p)
 {
-    printf("rec:type=%ld,msg=%s\n",p->type,p->msg);
+    char buf[32];
+    snprintf(buf,32,"%d;%s",p->type,p->msg);
+    if(full_queue(sendQ_ptr)){
+       Empty_Queue(sendQ_ptr);
+    }
+    Enter_Queue(sendQ_ptr,buf);
 }
+
+

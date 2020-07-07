@@ -16,10 +16,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define COMMAND_MAX 1
+#define COMMAND_MAX 50
 #define MQ_KEY_PATH "/lib"
 #define MQ_KEY_CHAR 'A'
 #define MQ_MSGBUF_LEN 50
+#define NUM 10
 
 /********命令种类**********
  * 字符串格式：（分号“；”是格式内一部分）
@@ -33,57 +34,66 @@ typedef struct mqbuf
         char msg[MQ_MSGBUF_LEN];
 }MSG;
 
+enum remoteCmd
+{
+    chanshi = 0,
+    remoteCmdMax
+};
+
 typedef struct
 {
-    char type[5];
-    char shebei[10];
-    char value[2];
+    char type[NUM];
+    char value[24];
 }CMD;
 
 
 /* ***********
  * 获取命令
  * ***********/
-bool getCommand(char * data,char (*cmd)[50],int len)
+bool getCommand(char * data,char *cmd,int len ,char *num)
 {
     char *p = data;
-    char cmdNum[10] = {0};
+    char cmdNum[NUM] = {0};
     bool getCmd = false;
-    int cmd_count = 0;
+    unsigned char rmtCmd[remoteCmdMax];
+    int i = 0;
+    for(;i < remoteCmdMax; i++){
+        rmtCmd[i] = 0x0;
+    }
     if(len > 0){
-        //铲屎
         while (*p != '\0') {
-            if(*p == 'c'){
+            if(0 == rmtCmd[chanshi] && *p == 'c'){//铲屎
                 if (0 == memcmp(p,"chanshi=start",strlen("chanshi=start") )) {
                     p += strlen("chanshi=start");
-                    while (*p != '\0') {
-                        if (*p == 'n') {
-                            if (0 == memcmp(p,"num=",strlen("num="))) {
-                                p += strlen("num=");
-                                int i = 0;
-                                while(*p != '&' && *p != '\0' && i < 9){
-                                    cmdNum[i] = *p;
-                                    i++;
-                                    p++;
-                                }
-                                if (i > 0){
-                                    sprintf(cmd[cmd_count],";%d;%s;%d;",CMD_CHANSHI_ID,cmdNum,1);
-                                    getCmd = true;
-                                    cmd_count++;
-                                    break;
-                                }
+                }
+                rmtCmd[chanshi] = 0x01;
+                continue;
+            }
 
-                            }
-
-                        }
+            if (!getCmd && *p == 'n') {
+                if (0 == memcmp(p,"num=",strlen("num="))) {
+                    p += strlen("num=");
+                    int i = 0;
+                    while(*p != '&' && *p != '\0' && i < NUM){
+                        cmdNum[i] = *p;
+                        i++;
                         p++;
                     }
+                    strcpy(num,cmdNum);
+                    getCmd = true;
+                    continue;
                 }
-
             }
             p++;
         }
 
+    }
+    if (getCmd) {
+        sprintf(cmd,"%s;",cmdNum);
+        for (i = 0; i < remoteCmdMax; i++){
+            //保证一位代表枚举的一位命令
+            sprintf(cmd + (strlen(cmd)),"%d;",rmtCmd[i] % 9);
+        }
     }
     return getCmd;
 }
@@ -93,20 +103,24 @@ bool getSendMsg(CMD *cmd,char *data)
     if(strlen(data) > 50){
         return false;
     }
+
     char *p = data;
-    p++;
     int i = 0;
-    while(*p++ != ';' && i++ < sizeof(cmd->type) - 1){
-        cmd->type[i-1] = *(p - 1);
+    while(*p != ';' && i < sizeof(cmd->type)){
+        cmd->type[i] = *(p);
+        p++;
+        i++;
     }
+    cmd->type[i + 1] = '\0';
     i = 0;
-    while(*p++ != ';' && i++ < sizeof(cmd->shebei) - 1){
-        cmd->shebei[i-1] = *(p - 1);
+    p++;
+    while(*p != ';' && i < sizeof(cmd->value)){
+        cmd->value[i] = *(p);
+        p++;
+        i++;
     }
-    i = 0;
-    while(*p++ != ';' && i++ < sizeof(cmd->value) - 1){
-        cmd->value[i-1] = *(p -1);
-    }
+    cmd->value[i] = ';';
+    cmd->value[i+1] = '\0';
     return true;
 }
 
@@ -114,7 +128,7 @@ bool getSendMsg(CMD *cmd,char *data)
 /* ***********
  * 任务处理
  * ***********/
-int processTask(char (*cmd)[50])
+int processTask(char *cmd)
 {
 
     key_t key = ftok(MQ_KEY_PATH,MQ_KEY_CHAR);
@@ -124,27 +138,16 @@ int processTask(char (*cmd)[50])
         return 0;
     }
     MSG buf;
-    int i = 0;
-    for(;i < COMMAND_MAX ;i++){
-        printf("%s",cmd[i]);
-        if(cmd[i][0] == ';'){
-            bzero(&buf,sizeof(buf));
-            CMD command;
-
-            if(getSendMsg(&command,cmd[i])){
-                buf.type = atol(command.type);
-                sprintf(buf.msg,";%s;%s;",command.shebei,command.value);
-                msgsnd(msgid,&buf,MQ_MSGBUF_LEN,0);
-                printf("send msg type:%ld,msg:%s\n",buf.type,buf.msg);
-            }
-//            if ( buf.type > 0){
-//                strcpy(buf.msg,getMsg(p));
-
-//            }
-
-        }
+    CMD command;
+    if(getSendMsg(&command,cmd)){
+        bzero(&buf,sizeof(buf));
+        buf.type = atol(command.type);
+        strcpy(buf.msg,command.value);
+        msgsnd(msgid,&buf,MQ_MSGBUF_LEN,0);
+        printf("send msg type:%ld,msg:%s\n",buf.type,buf.msg);
     }
-    return 1;
+
+   return 1;
 
 }
 
@@ -152,9 +155,9 @@ int main()
 {
     //web
     size_t i = 0,n = 0;
-    char num[10] = {"0"};
+    char num[10] = {'\0'};
     char *method = NULL;
-    char command[COMMAND_MAX][50] = {0};
+    char command[COMMAND_MAX] = {'\0'};
     //获取HTTP请求方法(POST/GET)
     if (NULL == (method = getenv("REQUEST_METHOD")))
     {
@@ -173,8 +176,7 @@ int main()
             //从标准输入读取一定数据
             fread(inputdata, sizeof(char), length, stdin);
             //获取命令
-            if(getCommand(inputdata,command,length)){
-                printf("cmd is : %s\n",command[0]);
+            if(getCommand(inputdata,command,length,num)){
                 processTask(command);
             }else{
                 printf("任务解析失败\n");
@@ -190,8 +192,8 @@ int main()
             int length = strlen(inputdata);
    //         printf("+++html data len = %d++%s+++",strlen(inputdata),inputdata);
             //获取命令
-            if(getCommand(inputdata,command,length)){
-                printf("cmd is : %s\n",command[0]);
+            if(getCommand(inputdata,command,length,num)){
+                printf("命令已发出！");
                 processTask(command);
             }else{
                 printf("任务解析失败\n");
@@ -205,6 +207,6 @@ int main()
           return 0;
     }
 
-    printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/control.html?num=%s\">",num);
+    printf("<meta http-equiv=\"Refresh\" content=\"3;URL=/control.html?num=%s\">",num);
 
 }
