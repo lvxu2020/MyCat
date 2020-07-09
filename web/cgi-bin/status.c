@@ -3,14 +3,34 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include <sys/ipc.h>
+#include <strings.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <signal.h>
+#include <sys/stat.h>
+#include <sys/msg.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#define COMMAND_MAX 50
+#define MQ_KEY_PATH "/lib"
+#define MQ_KEY_CHAR 'A'
+#define MQ_MSGBUF_LEN 3
+#define NUM 10
+
 #define COMMAND_MAX 1
+
+typedef struct mqbuf
+{
+        long type;
+        char msg[MQ_MSGBUF_LEN];
+}MSG;
 
 int main()
 {
-//    printf("content-type:text/html;charset=utf-8\n\n");
-//    printf("hello world");
- //   printf("<meta http-equiv=\"Refresh\" content=\"5;URL=/status.html\">");
-
 
     //web
     size_t i = 0,n = 0;
@@ -45,7 +65,20 @@ int main()
         }else{
             int length = strlen(inputdata);
             sscanf(inputdata,"num=%s",num);
-            printf("+lvxulen = %d++%s+++",strlen(inputdata),inputdata);
+            key_t key = ftok(MQ_KEY_PATH,MQ_KEY_CHAR);
+            int msgid = msgget(key,O_RDWR);
+            if (msgid <= 0){
+                printf("消息队列系统故障\n");
+            }else{
+                MSG buf;
+                char sendBuf[3] = {"1;"};
+                bzero(&buf,sizeof(buf));
+                buf.type = atol(num);
+                strcpy(buf.msg,sendBuf);
+                msgsnd(msgid,&buf,MQ_MSGBUF_LEN,0);
+                printf("+status.cgi  len = %d+buf+%s+++",strlen(inputdata),inputdata);
+
+            }
 
         }
 

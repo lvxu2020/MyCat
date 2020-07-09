@@ -15,7 +15,6 @@
 
 #define TABLE "USER_PASS"
 #define USER_DB_PATH "/home/lvxu/net/lvxu.db"
-#define USER_CONF_PATH "/home/lvxu/usr"
 #define SHM_MAX 128
 #define SHM_CHECK_OK "yes"
 
@@ -55,7 +54,7 @@ bool newUsr(char *name, char *pwd, char *num)
 {
     char file[100] = {0};
     char *shmBuf = NULL;
-    sprintf(file,"%s/%s/%s.conf",USER_CONF_PATH,name,num);
+    sprintf(file,"reg:%s;%s;%s;",num,name,pwd);
     //申请操作共享内存信号量
     key_t key = ftok("/",'a');
     int sem_req_shm = semget(key,1,O_RDWR);

@@ -7,7 +7,6 @@
 #include <strings.h>
 #include <sys/shm.h>
 #include <sys/types.h>
-#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -36,7 +35,8 @@ typedef struct mqbuf
 
 enum remoteCmd
 {
-    chanshi = 0,
+    status = 0,
+    chanshi,
     remoteCmdMax
 };
 
@@ -81,6 +81,7 @@ bool getCommand(char * data,char *cmd,int len ,char *num)
                     }
                     strcpy(num,cmdNum);
                     getCmd = true;
+
                     continue;
                 }
             }
@@ -89,11 +90,14 @@ bool getCommand(char * data,char *cmd,int len ,char *num)
 
     }
     if (getCmd) {
+        //停留在此页面状态肯定需要上报
+        rmtCmd[status] = 1;
         sprintf(cmd,"%s;",cmdNum);
         for (i = 0; i < remoteCmdMax; i++){
-            //保证一位代表枚举的一位命令
-            sprintf(cmd + (strlen(cmd)),"%d;",rmtCmd[i] % 9);
+            //保证一位代表枚举的一个命令
+            sprintf(cmd + (strlen(cmd)),"%d%c",rmtCmd[i] % 9,'\0');
         }
+        sprintf(cmd + (strlen(cmd)),";%c",'\0');
     }
     return getCmd;
 }

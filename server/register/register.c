@@ -5,11 +5,11 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/sem.h>
 #include <stdbool.h>
+
 
 
 
@@ -166,25 +166,67 @@ int getSemId(char *path,char ch)
 
 int analysis(char *buf)
 {
-    //获取字符错中文件夹
-    char dirBuf[128] = {0};
-    int n = strlen(buf);
-    if(n > 0 && n <= SHM_MAX){
-        char *dir = buf + n;
-        while(*dir-- != '/' && --n){
-        }
-        memcpy(dirBuf,buf,n);
-    }else{
+    char *p = buf;
+    if (0 != memcmp(p,"reg:",strlen("reg:"))) {
+        return 0;
+    }
+    p += strlen("reg:");
+    char id[10] = {'\0'};
+    char name[30] = {'\0'};
+    char pwd[20] = {'\0'};
+    int i = 0;
+    while (*p != ';') {
+        id[i++] = *p++;
+    }
+    if (*p++ != ';') {
+        return 0;
+    }
+    i = 0;
+    while (*p != ';') {
+        name[i++] = *p++;
+    }
+    if (*p++ != ';') {
+        return 0;
+    }
+    i = 0;
+    while (*p != ';') {
+        pwd[i++] = *p++;
+    }
+    if (*p++ != ';') {
         return 0;
     }
 
-    if(0 == mkdir(dirBuf,0777)){
-        int fd = open(buf,0777);
-        if (fd == -1){
-            return 0;
-        }else{
-            close(fd);
-            return SHM_TASK_TRTURN_OK;
-        }
+    char tempBuf[128] = {'\0'};
+    //创建以id为名字的文件集。
+    sprintf(tempBuf,"%s/%s",USER_CONF_PATH,id);
+    if(0 != mkdir(tempBuf,0777)){
+        return 0;
     }
+    //创建用户配置文本和设备状态上报文本。
+    memset(tempBuf,'\0',sizeof(tempBuf));
+    sprintf(tempBuf,"%s/%s/%s",USER_CONF_PATH,id,STATUS);
+    if (creat(tempBuf,0777) < 0) {
+        return 0;
+    }
+    memset(tempBuf,'\0',sizeof(tempBuf));
+    sprintf(tempBuf,"%s/%s/%s",USER_CONF_PATH,id,CONF);
+    if (creat(tempBuf,0777) < 0) {
+        return 0;
+    }
+    int fd = open(tempBuf,O_WRONLY);
+    if (fd < 0) {
+        return 0;
+    }
+    memset(tempBuf,'\0',sizeof(tempBuf));
+    sprintf(tempBuf,"usr:%s\npwd:%s\n",name,pwd);
+
+    if (-1 != write(fd,tempBuf,strlen(tempBuf))) {
+        close(fd);
+        return SHM_TASK_TRTURN_OK;
+    }else{
+        close(fd);
+        return 0;
+    }
+
+
 }
