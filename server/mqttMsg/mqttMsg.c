@@ -8,6 +8,7 @@
 threadpool_t *pool = NULL;
 //每次用到此值时从寄存器重新读取，而不是在缓存中拿数据
 volatile MQTTClient_deliveryToken deliveredtoken;
+parmElement pArr[POOL_QUEUE_MAX];
 
 void * mqttMsgRec(void *p)
 {
@@ -22,7 +23,7 @@ void * mqttMsgRec(void *p)
     getID(sub_id);
     char topic[128] = {TOPIC_C_S};
 
-    MQTTClient_connectOptions conn_opts=MQTTClient_connectOptions_initializer;
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
     if (opt_init(&port,address,sub_id,topic) < 0) {
         printf("opt_init failure:%s\n",strerror(errno));
         return 1;
@@ -43,9 +44,11 @@ void * mqttMsgRec(void *p)
     MQTTClient_subscribe(client,topic,qos);    
     while (pool == NULL) {
         /*创建线程池，池里最小3个线程，最大100，队列最大100*/
-        pool = threadpool_create(3,100,100);
+        pool = threadpool_create(POOL_PTH_MIN,POOL_PTH_MAX,POOL_QUEUE_MAX);
         sleep(1);
     }
+    //清零线程池中回调函数的参数数组。
+    bzero( pArr, sizeof(pArr));
     printf("pool creat succeed!\n");
     while (1) {
         sleep(10);
@@ -141,10 +144,14 @@ void connlost(void *context,char *cause)
 /********************************
  * cTos:125;1;数据;
  * 上面为报文格式.
+ * 解析出想要的数据结构
  ****************************** */
 bool analysisTask(DataFromClient *task,char *data)
 {
     printf("analysisTask in %s\n",data);
+    if (task == NULL) {
+        return false;
+    }
     char *p = data;
     char id[10] = {'\0'};
     char type[10] = {'\0'};
@@ -165,7 +172,6 @@ bool analysisTask(DataFromClient *task,char *data)
         type[i++] = *p++;
     }
     task->type = atoi(type);
-    printf("task->type is %d \n",task->type);
     if(*p++ != ';'){
         return false;
     }
@@ -176,6 +182,12 @@ bool analysisTask(DataFromClient *task,char *data)
     if(*p++ != ';'){
         return false;
     }else{
+        switch (task->type) {
+        case 0:{//消息上报，写在本地文件中
+            task->fun = &statusUpdate;
+        }break;
+        default :break;
+        }
         return true;
     }
 }
@@ -198,6 +210,37 @@ void *statusUpdate(void *arg)
     close(fd);
 }
 
+bool getParmPtr(parmElement *arr, DataFromClient **p, int max)
+{
+    int i = 0;
+    for(;i < max;i++){
+        if(!arr[i].busy){
+            *p = &arr[i].parm;
+            arr[i].busy = true;
+            return true;
+        }
+    }
+    return false;
+}
+
+void freeParmPtr( parmElement *arr, int arr_N)
+{
+    //清零操作后 busy位置 责为false。不用再手动置零了。
+    bzero(&arr[arr_N], sizeof(parmElement));
+}
+
+/*************************
+*为了避免内存碎片，将程序需要盛情
+* 的内存放在数组中，所已此函数执行
+* 之后会讲所用的数组置为空闲
+************************ */
+void *functionVec( void *p)
+{
+    DataFromClient *ptr = (DataFromClient*)p;
+    ptr->fun(ptr);
+    freeParmPtr(pArr,ptr->arr_N);
+}
+
 /* *****************
  *解析收到的mqqt字符串
  *放入线程池的队列中
@@ -205,20 +248,45 @@ void *statusUpdate(void *arg)
 void pushTaskPool(char *data)
 {
     lock_pool_mutex(pool);
-    //队列中保存的是指针，所以得申请个空间存参数。线程昨晚任务会释放掉这个参数
-    DataFromClient *p = (DataFromClient *)malloc(sizeof(DataFromClient));
-    if(!analysisTask(p,data)){
+    //从数组中拿空闲的指针。
+    DataFromClient *p =NULL;
+    //队列满了，请求不受理
+    if ( is_pool_queue_full(pool) || !getParmPtr(pArr,&p,sizeof(pArr))) {
+        unlock_pool_mutex(pool);
         return;
     }
-    printf("++++++++jiexichengong++++task.id is %d+\n",p->id);
-    switch (p->type) {
-    case 0:{//消息上报，写在本地文件中
-        threadpool_add(pool, statusUpdate, (void *)p);/* 向任务队列中， 添加一个任务 */
-    }break;
-    default :break;
+    if(!analysisTask(p,data)){
+        unlock_pool_mutex(pool);
+        printf("analysisTask faile\n");
+        return;
     }
+    //解析后的数据放进队列，此p的数据结构中已经包含了执行任务的函数
+    threadpool_add(pool, functionVec, (void *)p);/* 向任务队列中， 添加一个任务 */
     unlock_pool_mutex(pool);
 }
+//上文为了避免过多申请内存造成内存碎片，而采用新手法。我可真牛逼，哈哈哈
+//void pushTaskPool(char *data)
+//{
+//    lock_pool_mutex(pool);
+//    //队列中保存的是指针，所以得申请个空间存参数。线程昨晚任务会释放掉这个参数
+//    DataFromClient *p = (DataFromClient *)malloc(sizeof(DataFromClient));
+//    if (p == NULL) {
+//        unlock_pool_mutex(pool);
+//        return;
+//    }
+//    if(!analysisTask(p,data)){
+//        unlock_pool_mutex(pool);
+//        return;
+//    }
+//    printf("++++++++jiexichengong++++task.id is %d+\n",p->id);
+//    switch (p->type) {
+//    case 0:{//消息上报，写在本地文件中
+//        threadpool_add(pool, statusUpdate, (void *)p);/* 向任务队列中， 添加一个任务 */
+//    }break;
+//    default :break;
+//    }
+//    unlock_pool_mutex(pool);
+//}
 
 int msgarrvd(void *context,char *topicName,int topicLen,MQTTClient_message *message)
 {

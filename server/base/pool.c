@@ -111,12 +111,6 @@ void *threadpool_thread(void *threadpool)
         pthread_mutex_unlock(&(pool->thread_counter));
         //(*(task.function))(task.arg);                 /*执行回调函数任务，相当于process(arg)  */
         (task.function)(task.arg);
-        // 自我修改，存在参数声明周期要长。所以加入队列前malloc了。在此做完任务要释放掉。
-        if(task.arg != NULL){
-            free(task.arg);
-            task.arg = NULL;
-        }
-
         /*任务结束处理*/
         printf("thread 0x%x end working\n\n", (unsigned int)pthread_self());
         usleep(10000);
@@ -200,6 +194,7 @@ void unlock_pool_mutex(threadpool_t *pool)
 {
     pthread_mutex_unlock( &(pool->lock) );
 }
+//此函数配合 lock_pool_mutex 和 unlock_pool_mutex 使用。保证独占资源
 bool is_pool_queue_full(threadpool_t *pool)
 {
      if (pool->queue_size == pool->queue_max_size) {
