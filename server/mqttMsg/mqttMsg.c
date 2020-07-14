@@ -8,29 +8,26 @@
 threadpool_t *pool = NULL;
 //每次用到此值时从寄存器重新读取，而不是在缓存中拿数据
 volatile MQTTClient_deliveryToken deliveredtoken;
+//队列指针地址空间
 parmElement pArr[POOL_QUEUE_MAX];
 
 void * mqttMsgRec(void *p)
 {
 
     MQTTClient client;
-    const int qos = 1;
     const long timeout = 5000L;
-    char buf[128];
-    int port = PORT;
-    char address[128] = {ADDRESS};
+    char connectBuf[128];
     char sub_id[128] = {'\0'};
     getID(sub_id);
-    char topic[128] = {TOPIC_C_S};
 
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-    if (opt_init(&port,address,sub_id,topic) < 0) {
+    if (opt_init(connectBuf) < 0) {
         printf("opt_init failure:%s\n",strerror(errno));
         return 1;
     }
-    snprintf(buf,sizeof(buf),"tcp://%s:%d",address,port);
+
     //创建链接
-    MQTTClient_create(&client,buf,sub_id,MQTTCLIENT_PERSISTENCE_NONE,NULL);
+    MQTTClient_create(&client,connectBuf,sub_id,MQTTCLIENT_PERSISTENCE_NONE,NULL);
     conn_opts.keepAliveInterval=20;
     conn_opts.cleansession=1;
     //设置回调函数
@@ -40,8 +37,8 @@ void * mqttMsgRec(void *p)
         printf("MQTTClient_connect failure:%s\n",strerror(errno));
         return -1;
     }
-    printf("Subscribe to topic %s for client %s using QOS %d\n",topic,sub_id,qos);
-    MQTTClient_subscribe(client,topic,qos);    
+    //订阅主题
+    getSubscribe(client);
     while (pool == NULL) {
         /*创建线程池，池里最小3个线程，最大100，队列最大100*/
         pool = threadpool_create(POOL_PTH_MIN,POOL_PTH_MAX,POOL_QUEUE_MAX);
@@ -51,8 +48,8 @@ void * mqttMsgRec(void *p)
     bzero( pArr, sizeof(pArr));
     printf("pool creat succeed!\n");
     while (1) {
-        sleep(10);
-        printf(" 挂机 \n");
+        printf("  mqttMsgRec sleep 20\n");
+        sleep(20);
     }
 
 }
@@ -111,15 +108,87 @@ void getID(char *time)
     snprintf(time,128,"id:%ld,%ld",tv.tv_sec,tv.tv_usec);
 }
 
-int opt_init(int *port, char address[], char id[], char topic[])
+int opt_init( char buf[])
 {
-    int fd = open(CONFIG_PATH,"r");
-    if (fd == -1){//默认设置。
-
-        return 1;
-    }else{//重文件中读取数据赋值，最近在考虑是否json化配置文件。此处先不写。
-        return 1;
+    char conf[CONFIG_H][CONFIG_L] = {'\0'};
+    char tempBuf[CONFIG_L] = {'\0'};
+    FILE *fp = fopen(CONFIG_PATH,"r");
+    if (NULL == fp) {
+        sprintf(buf,"tcp://127.0.0.1:1883");
+        printf("open server.conf faled\n");
+    }else {
+        int i = 0;
+        while (i < CONFIG_H  && fgets(tempBuf,CONFIG_L,fp) != NULL ) {
+            char *p = tempBuf;
+            bool start = false;
+            int j = 0;
+            while (*p != '\0') {
+               if (*p == ':') {
+                  start = true;
+                  p++;
+               }
+               if (start && *p != '\n') {
+                   conf[i][j++] = *p;
+               }
+               p++;
+            }
+            bzero(tempBuf,sizeof(tempBuf));
+            i++;
+        }
+        sprintf(buf,"tcp://%s:%s",conf[0],conf[1]);
+        fclose(fp);
     }
+    return 1;
+}
+
+int getSubscribe(MQTTClient client)
+{
+    FILE *fp = fopen(TOPIC_PATH,"r");
+    if (NULL == fp) {
+        return 0;
+    }else {
+        char tempBuf[64] = {'\0'};
+        char tempQos[2] = {'\0'};
+        topicQos top[TOPIC_H];
+        bzero(top,sizeof(top));
+        int i = 0;
+        while (i < TOPIC_H  && fgets(tempBuf,TOPIC_L,fp) != NULL ) {
+
+            char *p = tempBuf;
+            if (0 != memcmp(p,"qos:",strlen("qos:"))) {
+                break;
+            }
+            int j = 0;
+            while (*p != ';' && *p != '\0') {
+                if (j++ >= strlen("qos:")) {
+                    tempQos[0] = *p;
+                    printf("qos is %s\n",tempQos);
+                    top[i].qos = atoi(tempQos);
+                    p += 2;
+                    break;
+                }
+                p++;
+            }
+            j = 0;
+            while (*p != '\n' && *p != '\0' && i < CONFIG_L) {
+                top[i].topic[j++] = *p;
+                p++;
+            }
+            printf("jiexi tpoic is %s\n",top[i].topic);
+            bzero(tempBuf,sizeof(tempBuf));
+            i++;
+        }
+        int connect = 0;
+        while (connect != i) {
+            printf("Subscribe to topic %s  using QOS %d\n",top[connect].topic,top[connect].qos);
+            MQTTClient_subscribe(client,top[connect].topic,top[connect].qos);
+            connect++;
+        }
+        return i;
+    }
+
+
+
 }
 
 void delivered(void *context,MQTTClient_deliveryToken dt)
@@ -186,11 +255,27 @@ bool analysisTask(DataFromClient *task,char *data)
         case 0:{//消息上报，写在本地文件中
             task->fun = &statusUpdate;
         }break;
+        case 1:{
+            task->fun = &regiseterId;
+        }break;
         default :break;
         }
         return true;
     }
 }
+
+/* *******板子第一次联网后，向服务器申请id********
+* 数据格式：cTos:125;1；
+****************************************** */
+void *regiseterId(void *arg)
+{
+    DataFromClient *p = (DataFromClient *)arg;
+    int n = strlen(p->buf);
+    n = n < REC_BUF_MAX ? n: REC_BUF_MAX;
+
+    return;
+}
+
 /**************************
  * 周期性上传，丢几次没事
  * ********************** */

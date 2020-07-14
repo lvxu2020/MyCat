@@ -74,7 +74,7 @@ void *threadpool_thread(void *threadpool)
         while( (pool->queue_size ==0) && (!pool->shutdown) ) //线程池没有任务且不关闭线程池。
         {
             printf("thread 0x%x is waiting\n", (unsigned int)pthread_self());
-            pthread_cond_wait(&(pool->queue_not_empty), &(pool->lock));//线程阻塞在这个条件变量上
+            pthread_cond_wait(&(pool->queue_not_empty), &(pool->lock));//线程阻塞在这个条件变量上,（此时锁被释放掉了其实）
             /*清除指定数目的空闲线程，如果要结束的线程个数大于0，结束线程*/
             if( pool->wait_exit_thr_num > 0)  /* 要销毁的线程个数大于0 */
             {
@@ -112,8 +112,8 @@ void *threadpool_thread(void *threadpool)
         //(*(task.function))(task.arg);                 /*执行回调函数任务，相当于process(arg)  */
         (task.function)(task.arg);
         /*任务结束处理*/
-        printf("thread 0x%x end working\n\n", (unsigned int)pthread_self());
-        usleep(10000);
+//        printf("thread 0x%x end working\n\n", (unsigned int)pthread_self());
+//        usleep(10000);
         pthread_mutex_lock(&(pool->thread_counter));
         pool->busy_thr_num--;                 /*处理掉一个任务，忙状态数线程数-1*/
         pthread_mutex_unlock(&(pool->thread_counter));
@@ -140,14 +140,14 @@ void *adjust_thread(void *threadpool)
     while( !(pool->shutdown)  ) //线程池没有关闭
     {
         sleep(DEFAULT_TIME);                                    /*定时 对线程池管理*/
-        printf("10s is finish,start test thread pool\n");
+ //       printf("10s is finish,start test thread pool\n");
         pthread_mutex_lock(&(pool->lock));
         int queue_size = pool->queue_size;                      /* 关注 任务数 */
         int live_thr_num = pool->live_thr_num;                  /* 存活 线程数 */
         pthread_mutex_unlock(&(pool->lock));
         pthread_mutex_lock(&(pool->thread_counter));
         int busy_thr_num = pool->busy_thr_num;                  /* 忙着的线程数 */
-        printf("busy_thr_num is %d\n",busy_thr_num);
+//        printf("busy_thr_num is %d\n",busy_thr_num);
         pthread_mutex_unlock(&(pool->thread_counter));
         /* 创建新线程 算法： 任务数大于最小线程池个数, 且存活的线程数少于最大线程个数时 如：30>=10 && 40<100*/
         if (queue_size >= MIN_WAIT_TASK_NUM && live_thr_num < pool->max_thr_num)

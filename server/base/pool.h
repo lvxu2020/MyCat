@@ -12,7 +12,7 @@
 #include <stdbool.h>
 
 
-#define DEFAULT_TIME 10 //10s检测一次
+#define DEFAULT_TIME 5 //5s检测一次
 #define MIN_WAIT_TASK_NUM 10/*如果queue_size > MIN_WAIT_TASK_NUM 添加新的线程到线程池*/
 #define DEFAULT_THREAD_VARY 10/*每次创建和销毁线程的个数*/
 
