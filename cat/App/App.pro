@@ -35,13 +35,19 @@ include    ($$PWD/../Base/Base.pro)
 include    ($$PWD/../KTV/KTV.pro)
 include    ($$PWD/../MJson/MJson.pro)
 include    ($$PWD/../LOG/LOG.pro)
+include    ($$PWD/../Mqtt/Mqtt.pro)
+include    ($$PWD/NetMonitor/NetMonitor.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-#LIBS += -l pthread
+INCLUDEPATH += /usr/local/include/
+
+LIBS += -lpthread \
+    -L /usr/local/lib/paho-mqtt3c
+
 
 DESTDIR = ~/qt_output/executableProgram/cat
 

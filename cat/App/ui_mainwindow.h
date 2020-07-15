@@ -31,6 +31,7 @@ public:
     QPushButton *connectWIFI;
     QLabel *WIFIConnect;
     QLabel *WIFIName;
+    QLabel *netWork1;
     QWidget *manual;
     QLabel *labVerson;
     QLabel *labVersonNum;

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "./UI/WIFI/dialogscanmask.h"
+#include "./NetMonitor/netMonitor.h"
 #include <vector>
 
 
@@ -25,6 +26,7 @@ signals:
 private slots:
     void slot_scanfOver(bool);
     void slot_wifiConnectChanged(std::string);
+    void slot_netStatusChange(bool);
     void on_WIFIScan_clicked();
 
 

@@ -92,6 +92,19 @@
        <string/>
       </property>
      </widget>
+     <widget class="QLabel" name="netWork1">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>101</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>网络不可用</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="manual">
      <attribute name="title">
