@@ -60,6 +60,10 @@ public:
         WIFIConnect = new QLabel(WIFI);
         WIFIConnect->setObjectName(QString::fromUtf8("WIFIConnect"));
         WIFIConnect->setGeometry(QRect(30, 20, 67, 17));
+        netWork1 = new QLabel(WIFI);
+        netWork1->setObjectName(QString::fromUtf8("netWork1"));
+        netWork1->setGeometry(QRect(20, 50, 101, 21));
+
         WIFIName = new QLabel(WIFI);
         WIFIName->setObjectName(QString::fromUtf8("WIFIName"));
         WIFIName->setGeometry(QRect(150, 20, 451, 20));

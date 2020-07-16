@@ -1,30 +1,17 @@
-#ifndef MQTTCLINET_H
-#define MQTTCLINET_H
+#ifndef MQTTSEND_H
+#define MQTTSEND_H
+
 
 #include <string>
-#include <map>
 #include "MQTTClient.h"
-#include <pthread.h>
-#include <assert.h>
-#include <stdlib.h> // atexit
 
 #define NOT_INIT -9
 #define CONNECT_FAIL -8
 
-
-typedef struct{
-    int len;
-    void *p;
-} MqttMess;
-
-class MqttClinet
+class MqttSend
 {
 public:
-
-    static MqttClinet *getIntence();
-    static void connlost(void *context,char *cause);
-    static int msgarrvd(void *context,char *topicName,int topicLen,MQTTClient_message *message);
-    std::string getID();
+    MqttSend();
     /*******session
     一般来说，客户端在请求连接服务器时总是将清除会话标志设置为0或1，在建立会话连接后
     ，这个值就固定了，当然这个值的选择取决于具体的应用，如果清除会话标志设置为1，那么客户
@@ -43,25 +30,18 @@ public:
     void setInit(std::string serverAdd, std::string port, int interval, int session);
     //链接mqtt服务器
     int connectMqtt();
-    //订阅主题,服务质量，设置回调函数(此回调函数生命周期尽量短暂。以免影响下一条消息接收)
-    int subscribe(std::string topic, int qos, void *(*fun)(void *));
-private://单利
-    static void single();
-    static void destroy();
-    static pthread_once_t ponce_;
-    static MqttClinet* value_;
-    MqttClinet();
-    ~MqttClinet();
+    //发送消息。主题，内容，保留时间，服务质量，超时等待时间(毫秒)
+    void sendMess(std::string topic, std::string text, int retained, int qos, long timeOut);
 private:
     MQTTClient client;
     volatile MQTTClient_deliveryToken deliveredtoken;
+    MQTTClient_message publish_msg;
+    MQTTClient_deliveryToken token;
     MQTTClient_connectOptions conn_opts;
     std::string addPort;
     std::string mqttID;
-    std::map<std::string, void *(*)(void *)> callbackVec;
     bool isInit = false;
     bool ConnectedServer = false;
-
 };
 
-#endif // MQTTCLINET_H
+#endif // MQTTSEND_H

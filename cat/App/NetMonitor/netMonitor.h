@@ -18,7 +18,7 @@ public:
 signals:
     void monitorTimerStart();
     void monitorTimerStop();
-    void netSatusChange(bool);
+    void sig_netSatusChange(bool);
 private slots:
     void slot_monitor();
     void slot_monitorTimerStart();

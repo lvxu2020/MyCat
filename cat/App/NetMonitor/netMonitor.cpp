@@ -3,13 +3,16 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "../../Mqtt/mqttSend.h"
 
 NetMonitor::NetMonitor()
 {
-    //ping 3秒一次监控联网状态，连接的wifi名称
+    //ping 5秒一次监控联网状态，连接的wifi名称
     monitorPtr = new QTimer(this);
-    monitorPtr->setInterval(3000);
+    monitorPtr->setInterval(5000);
     connect(monitorPtr,SIGNAL(timeout()),this,SLOT(slot_monitor()));
+    connect(this,SIGNAL(monitorTimerStart()),this,SLOT(slot_monitorTimerStart()));
+    connect(this,SIGNAL(monitorTimerStop()),this,SLOT(slot_monitorTimerStop()));
 }
 
 bool NetMonitor::getNetStatus()
@@ -79,7 +82,14 @@ void NetMonitor::slot_monitor()
     }
     if (res != netIsOK) {
         netIsOK = res;
-        netSatusChange(netIsOK);
+        MqttSend test;
+        test.setInit("192.168.1.151","1883",60,1);
+        if (0 != test.connectMqtt()) {
+            printf("lian jie  shi bai tie zi\n");
+        }
+        void sendMess(std::string topic, std::string text, int retained, int qos, long timeOut);
+        test.sendMess("cToS","cTos:127;0;luxuNB;",0,0,100L);
+        sig_netSatusChange(netIsOK);
     }
 }
 

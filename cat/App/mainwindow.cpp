@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(WIFI_Single::instance(),SIGNAL(sig_scanOver(bool)),this,SLOT(slot_scanfOver(bool)));
     connect(this,SIGNAL(sig_scanWIFI()),WIFI_Single::instance(),SLOT(slot_scanWIFI()));
     connect(WIFI_Single::instance(),SIGNAL(sig_connectStatus(std::string)),this,SLOT(slot_wifiConnectChanged(std::string)));
-    connect(NetMonitor_Single::instance(),SIGNAL(netSatusChange(bool)),this,SLOT(slot_netStatusChange(bool)));
+    connect(NetMonitor_Single::instance(),SIGNAL(sig_netSatusChange(bool)),this,SLOT(slot_netStatusChange(bool)));
     init();
 }
 
@@ -37,6 +37,7 @@ void MainWindow::init()
     ui->WIFIConnect->setText("未链接");
     ui->netWork1->setText("网络不可用");
     ui->WIFIName->setText("");
+    NetMonitor_Single::instance()->monitorTimerStart();
 
 }
 void MainWindow:: clearQListWidget(QListWidget * ptr ,QList<QListWidgetItem*> & vec){
@@ -120,5 +121,4 @@ void MainWindow::slot_netStatusChange(bool net)
     }else {
         ui->netWork1->setText("网络不可用");
     }
-
 }
