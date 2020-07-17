@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "../../Mqtt/mqttSend.h"
+
 
 NetMonitor::NetMonitor()
 {
@@ -79,16 +79,21 @@ void NetMonitor::slot_monitor()
         res = false;
     }else {
         res = true;
+        // 测试mqtt用的
+//        MqttSend test;
+//        printf("wo neng da yin\n");
+//        test.setInit("192.168.1.151","1883",60,1);
+//        if (0 != test.connectMqtt()) {
+//            printf("lian jie  shi bai tie zi\n");
+//        }else{
+//            printf("connectMqtt chenggong\n");
+//
+//            test.sendMess("cToS","cTos:127;0;luxuNB;",0,0,100L);
+//        }
+
     }
     if (res != netIsOK) {
         netIsOK = res;
-        MqttSend test;
-        test.setInit("192.168.1.151","1883",60,1);
-        if (0 != test.connectMqtt()) {
-            printf("lian jie  shi bai tie zi\n");
-        }
-        void sendMess(std::string topic, std::string text, int retained, int qos, long timeOut);
-        test.sendMess("cToS","cTos:127;0;luxuNB;",0,0,100L);
         sig_netSatusChange(netIsOK);
     }
 }

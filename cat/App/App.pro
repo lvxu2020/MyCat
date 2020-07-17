@@ -12,7 +12,6 @@ TARGET = App
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
-App.depends = Mqtt
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -35,6 +34,7 @@ include    ($$PWD/../Base/Base.pro)
 include    ($$PWD/../KTV/KTV.pro)
 include    ($$PWD/../MJson/MJson.pro)
 include    ($$PWD/../LOG/LOG.pro)
+include    ($$PWD/../Mqtt/Mqtt.pro)
 include    ($$PWD/NetMonitor/NetMonitor.pri)
 
 # Default rules for deployment.
@@ -47,10 +47,15 @@ INCLUDEPATH += /usr/local/include/ \
 
 
 LIBS += -lpthread \
-    -L /home/lvxu/qt_output/executableProgram/cat/lib/LvXumqtt \
+#    -L /home/lvxu/qt_output/executableProgram/cat/lib -lLvXuMqtt \
+    -L /home/lvxu/net/mqtt/arm_mqtt/paho.mqtt.c-master/MQinstall/lib/ -lpaho-mqtt3c
+
 
 
 
 
 DESTDIR = ~/qt_output/executableProgram/cat
+
+
+
 

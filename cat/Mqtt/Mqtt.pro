@@ -1,14 +1,16 @@
-TEMPLATE = lib
-CONFIG += qt warn_on
-QT -= gui
-CONFIG += c++11
+#TEMPLATE = lib
+#CONFIG += qt warn_on
+#QT -= gui
+#CONFIG += c++11
 
-TARGET = LvXumqtt
+#TARGET = LvXuMqtt
 
-INCLUDEPATH += /usr/local/include/
+#INCLUDEPATH += /usr/local/include/
 
-LIBS += -lpthread \
-    -L /usr/local/lib/paho-mqtt3c
+#LIBS += -lpthread \
+##    -L /usr/local/lib/ -lpaho-mqtt3c
+##    -L /home/lvxu -lpaho-mqtt3c
+#    -L /home/lvxu/net/mqtt/arm_mqtt/paho.mqtt.c-master/MQinstall/lib/ -lpaho-mqtt3c
 
 HEADERS += \
     $$PWD/mqttClinet.h \
@@ -19,5 +21,5 @@ SOURCES += \
     $$PWD/mqttClinet.cpp \
     $$PWD/mqttSend.cpp
 
-DESTDIR =/home/lvxu/qt_output/executableProgram/cat/lib
+#DESTDIR =/home/lvxu/qt_output/executableProgram/cat/lib
 

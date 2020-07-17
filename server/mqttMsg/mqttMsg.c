@@ -1,7 +1,7 @@
 #include "mqttMsg.h"
 
 #define PORT 1883
-#define ADDRESS "127.0.0.1"
+#define ADDRESS "192.168.1.151"
 #define TOPIC_S_C "sToC_"
 #define TOPIC_C_S "cToS"
 
@@ -25,7 +25,7 @@ void * mqttMsgRec(void *p)
         printf("opt_init failure:%s\n",strerror(errno));
         return 1;
     }
-
+    printf("du qv %s\n",connectBuf);
     //创建链接
     MQTTClient_create(&client,connectBuf,sub_id,MQTTCLIENT_PERSISTENCE_NONE,NULL);
     conn_opts.keepAliveInterval=20;

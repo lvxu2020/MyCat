@@ -1,6 +1,6 @@
 TEMPLATE      = subdirs
 SUBDIRS += App \
-    Mqtt
+#    Mqtt
 
-App.depends += Mqtt \
+#App.depends += Mqtt \
 

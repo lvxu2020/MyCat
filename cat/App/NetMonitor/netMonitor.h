@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QTimer>
 #include <string>
+#include "../../Mqtt/mqttSend.h"
 
 #define BAIDU_IP "202.108.22.5"
 

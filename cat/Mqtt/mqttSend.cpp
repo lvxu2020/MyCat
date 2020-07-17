@@ -12,8 +12,10 @@
 MqttSend::MqttSend()
 {
     struct timeval tv;
+    char time[64];
     gettimeofday(&tv,NULL);//获取1970-1-1到现在的时间结果保存到tv中
-    mqttID = "id:" + tv.tv_sec + tv.tv_usec;
+    snprintf(time,64,"id:%ld,%ld",tv.tv_sec,tv.tv_usec);
+    mqttID = time;
 }
 
 void MqttSend::setInit(std::string serverAdd, std::string port, int interval, int session)
