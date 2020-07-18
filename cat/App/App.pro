@@ -35,6 +35,7 @@ include    ($$PWD/../KTV/KTV.pro)
 include    ($$PWD/../MJson/MJson.pro)
 include    ($$PWD/../LOG/LOG.pro)
 include    ($$PWD/../Mqtt/Mqtt.pro)
+include    ($$PWD/../Communication/Communication.pro)
 include    ($$PWD/NetMonitor/NetMonitor.pri)
 
 # Default rules for deployment.

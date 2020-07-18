@@ -23,7 +23,15 @@ MqttClinet::MqttClinet()
 
 MqttClinet::~MqttClinet()
 {
-
+    if (isInit) {
+        int rc;
+        if ((rc = MQTTClient_disconnect(client, 10000)) != MQTTCLIENT_SUCCESS)
+        {
+            printf("Failed to disconnect, return code %d\n", rc);
+            rc = EXIT_FAILURE;
+        }
+        MQTTClient_destroy(&client);
+    }
 }
 
 MqttClinet* MqttClinet::getIntence()

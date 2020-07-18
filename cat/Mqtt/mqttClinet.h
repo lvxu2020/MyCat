@@ -22,6 +22,7 @@ class MqttClinet
 public:
 
     static MqttClinet *getIntence();
+    //MQTT接口使用的函数得是静态的。
     static void connlost(void *context,char *cause);
     static int msgarrvd(void *context,char *topicName,int topicLen,MQTTClient_message *message);
     std::string getID();

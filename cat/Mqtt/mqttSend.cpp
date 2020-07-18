@@ -18,6 +18,19 @@ MqttSend::MqttSend()
     mqttID = time;
 }
 
+MqttSend::~MqttSend()
+{
+    if (isInit) {
+        int rc;
+        if ((rc = MQTTClient_disconnect(client, 10000)) != MQTTCLIENT_SUCCESS)
+        {
+            printf("Failed to disconnect, return code %d\n", rc);
+            rc = EXIT_FAILURE;
+        }
+        MQTTClient_destroy(&client);
+    }
+}
+
 void MqttSend::setInit(std::string serverAdd, std::string port, int interval, int session)
 {
     conn_opts = MQTTClient_connectOptions_initializer;
