@@ -32,6 +32,8 @@ public:
     QLabel *WIFIConnect;
     QLabel *WIFIName;
     QLabel *netWork1;
+    QLabel *label;
+    QLabel *sheibeihao;
     QWidget *manual;
     QLabel *labVerson;
     QLabel *labVersonNum;
@@ -63,6 +65,12 @@ public:
         netWork1 = new QLabel(WIFI);
         netWork1->setObjectName(QString::fromUtf8("netWork1"));
         netWork1->setGeometry(QRect(20, 50, 101, 21));
+        sheibeihao = new QLabel(WIFI);
+        sheibeihao->setObjectName(QString::fromUtf8("sheibeihao"));
+        sheibeihao->setGeometry(QRect(80, 310, 51, 16));
+        label = new QLabel(WIFI);
+        label->setObjectName(QString::fromUtf8("label"));
+        label->setGeometry(QRect(20, 310, 70, 17));
 
         WIFIName = new QLabel(WIFI);
         WIFIName->setObjectName(QString::fromUtf8("WIFIName"));

@@ -7,9 +7,14 @@
 #include <pthread.h>
 #include <assert.h>
 #include <stdlib.h> // atexit
+#include <fstream>
+#include <iostream>
+#include <mutex>
+#include "../LOG/Debug.h"
 
 #define NOT_INIT -9
 #define CONNECT_FAIL -8
+
 
 
 typedef struct{

@@ -10,6 +10,7 @@ NetMonitor::NetMonitor()
     //ping 5秒一次监控联网状态，连接的wifi名称
     monitorPtr = new QTimer(this);
     monitorPtr->setInterval(5000);
+//    monitorPtr->setSingleShot(true);
     connect(monitorPtr,SIGNAL(timeout()),this,SLOT(slot_monitor()));
     connect(this,SIGNAL(monitorTimerStart()),this,SLOT(slot_monitorTimerStart()));
     connect(this,SIGNAL(monitorTimerStop()),this,SLOT(slot_monitorTimerStop()));
@@ -92,10 +93,8 @@ void NetMonitor::slot_monitor()
 //        }
 
     }
-    if (res != netIsOK) {
-        netIsOK = res;
-        sig_netSatusChange(netIsOK);
-    }
+    netIsOK = res;
+    sig_netSatusChange(netIsOK);
 }
 
 void NetMonitor::slot_monitorTimerStart()
@@ -108,3 +107,7 @@ void NetMonitor::slot_monitorTimerStop()
     monitorPtr->stop();
 }
 
+bool NetMonitor::getNetConnection()
+{
+    return netIsOK;
+}

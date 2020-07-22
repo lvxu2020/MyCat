@@ -1,7 +1,7 @@
 #include "mqttMsg.h"
 
 #define PORT 1883
-#define ADDRESS "192.168.1.151"
+#define ADDRESS "192.168.1.152"
 #define TOPIC_S_C "sToC_"
 #define TOPIC_C_S "cToS"
 
@@ -58,7 +58,7 @@ void * mqttMsgSend(void *p)
 {
 
     MQTTClient client;
-    const int qos = 1;
+    const int qos = 0;
     const long timeout = 1000L;
     qData task;
     int port = PORT;
@@ -93,8 +93,9 @@ void * mqttMsgSend(void *p)
         sprintf(topic,"%s%d",TOPIC_S_C,task.N);
         bzero(sendBuf,sizeof(sendBuf));
         sprintf(sendBuf,"%d;%s",task.id,task.buf);
+        printf("send topic: %s,,,%s",topic,sendBuf);
         publish_msg.payload=(void *)sendBuf;
-        publish_msg.payloadlen=strlen(sendBuf);
+        publish_msg.payloadlen=strlen(sendBuf)+1;
         MQTTClient_publishMessage(client,topic,&publish_msg,&token);
         rv=MQTTClient_waitForCompletion(client,token,timeout);
     }

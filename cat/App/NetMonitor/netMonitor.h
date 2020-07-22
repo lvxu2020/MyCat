@@ -15,6 +15,7 @@ class NetMonitor : public QObject
 public:
     NetMonitor();
     bool getNetStatus();
+    bool getNetConnection();
     int ping(std::string);
 signals:
     void monitorTimerStart();

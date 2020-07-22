@@ -35,7 +35,7 @@
 #define DEBUG_W(format, ...)
 #endif
 
-//#define ENABLE_DEBUG_E_RECOD // 使能DEBUG_E记录
+#define ENABLE_DEBUG_E_RECOD // 使能DEBUG_E记录
 #define ENABLE_DEBUG_E_PRINT // 使能DEBUG_E输出
 
 #if defined ENABLE_DEBUG_E_RECOD && defined ENABLE_DEBUG_E_PRINT

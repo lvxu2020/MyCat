@@ -100,12 +100,20 @@ int MqttClinet::subscribe(std::string topic, int qos, void *(*fun)(void *))
         return -1;
     }
     callbackVec.insert(make_pair(topic,fun));
-    MQTTClient_subscribe(client,topic.c_str(),qos);
+    if (MQTTCLIENT_SUCCESS != MQTTClient_subscribe(client,topic.c_str(),qos)) {
+        DEBUG_E(" MqttClinet dingyue shibai");
+        return 0;
+    }
+    DEBUG_I("MqttClinet dingyue succeed");
+    return 1;
 }
 
 int MqttClinet::msgarrvd(void *context,char *topicName,int topicLen,MQTTClient_message *message)
 {
 
+    printf("Message arrived \n");
+    printf("topic:%s\n",topicName);
+    printf("Original Message :%s\n",message->payload);
     std::string topicNameStr = topicName;
     std::map<std::string, void *(*)(void *)>::iterator iter;
     iter = MqttClinet::getIntence()->callbackVec.find(std::string(topicName));
@@ -113,6 +121,7 @@ int MqttClinet::msgarrvd(void *context,char *topicName,int topicLen,MQTTClient_m
             iter == MqttClinet::getIntence()->callbackVec.end()) {
         MQTTClient_freeMessage(&message);
         MQTTClient_free(topicName);
+        printf("meiyou call back \n");
         return 0;
     }
     MqttMess mess;
@@ -120,9 +129,7 @@ int MqttClinet::msgarrvd(void *context,char *topicName,int topicLen,MQTTClient_m
     mess.p = message->payload;
     (*iter->second)((void*)&mess);
 
-    printf("Message arrived \n");
-    printf("topic:%s\n",topicName);
-    printf("Original Message :%s\n",message->payload);
+
 
 
     MQTTClient_freeMessage(&message);

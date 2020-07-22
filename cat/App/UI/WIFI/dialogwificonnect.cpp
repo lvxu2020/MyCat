@@ -693,6 +693,7 @@ void DialogWIFIConnect::slot_connectWifi()
     QString command;
     //wifi已保存在conf文件中，策略：将其删除从新链接
     std::map<int,std::string>::iterator key;
+    bool found = false;
     for(auto &map : configWifi){
         if(map.second == WIFI_Single::instance()->getConnectingWIFI()){
             //将存档中的旧帐号密码删除
@@ -700,10 +701,11 @@ void DialogWIFIConnect::slot_connectWifi()
             system(qStringToC(command));
             DEBUG_I("%s",qStringToC(command));
             key = configWifi.find(map.first);
+            found = true;
         }
     }
     //在循环中删除元素 会导致后面元素向前，使for循环崩溃
-    if(key != configWifi.end()){
+    if(found && key != configWifi.end()){
         configWifi.erase(key);
     }
     //配置文件中没有存档，则添加链接。并保存进文件。没有校验密码是否正确，以后需要处理
@@ -778,20 +780,16 @@ void DialogWIFIConnect::connectNewAccount()
     //2.帐号
     command = "wpa_cli -i wlan0 set_network " + QString::fromStdString(mNetId)  + " ssid " + "'" +"\"" + \
     QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()) +"\"" +"'";
-    DEBUG_I("%s",qStringToC(command));
     system(qStringToC(command));
     //3.密码
     command = "wpa_cli -i wlan0 set_network " + QString::fromStdString(mNetId) + " psk " + "'" +"\"" + \
     WIFIPwdStr +"\"" + "'";
-    DEBUG_I("%s",qStringToC(command));
     system(qStringToC(command));
     //4.使能网卡
     command = "wpa_cli -i wlan0 enable_network " + QString::fromStdString(mNetId);
-    DEBUG_I("%s",qStringToC(command));
     system(qStringToC(command));
     //5.选择新加的网卡
     command = "wpa_cli -i wlan0 select_network " + QString::fromStdString(mNetId);
-    DEBUG_I("%s",qStringToC(command));
     system(qStringToC(command));
     setVerifySsidPsk(QString::fromStdString(WIFI_Single::instance()->getConnectingWIFI()),\
     WIFIPwdStr,atoi(mNetId.c_str()));

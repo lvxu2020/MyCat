@@ -3,6 +3,7 @@
 
 #include "./WIFI/wifi.h"
 #include "./UI/WIFI/dialogwificonnect.h"
+#include "../Communication/ReadConf.h"
 #include <QDebug>
 #include <vector>
 #include "../Base/base.h"
@@ -36,8 +37,10 @@ void MainWindow::init()
     //WIFI链接状态
     ui->WIFIConnect->setText("未链接");
     ui->netWork1->setText("网络不可用");
+    ui->label->setText("设备号:");
     ui->WIFIName->setText("");
     NetMonitor_Single::instance()->monitorTimerStart();
+    ui->sheibeihao->setText(QString::fromStdString(ReadConf_Single::instance()->getID()));
 
 }
 void MainWindow:: clearQListWidget(QListWidget * ptr ,QList<QListWidgetItem*> & vec){
@@ -83,7 +86,6 @@ void MainWindow::slot_wifiConnectChanged(std::string name)
 {
     if(QString::fromStdString(name) == ""){
         ui->WIFIConnect->setText("未连接");
-        ui->netWork1->setText("网络不可用");
         ui->WIFIName->setText("");
     }else{
        ui->WIFIConnect->setText("已连接");
@@ -116,6 +118,12 @@ void MainWindow::on_connectWIFI_clicked()
 
 void MainWindow::slot_netStatusChange(bool net)
 {
+    static bool status = false;
+    if (status == net) {
+        return;
+    }else {
+        status = net;
+    }
     if (net) {
         ui->netWork1->setText("网络可用");
     }else {

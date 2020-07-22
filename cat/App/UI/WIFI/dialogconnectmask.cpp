@@ -7,8 +7,6 @@ DialogConnectMask::DialogConnectMask(QWidget *parent) :
     ui(new Ui::DialogConnectMask)
 {
     ui->setupUi(this);
-    connect(WIFI_Single::instance(),SIGNAL(sig_connectOver(bool)),this,SLOT());
-
 }
 
 DialogConnectMask::~DialogConnectMask()
