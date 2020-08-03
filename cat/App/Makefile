@@ -17,7 +17,7 @@ CXX           = g++
 DEFINES       = -DQT_DEPRECATED_WARNINGS -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -O2 -std=gnu++11 -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I. -isystem /usr/include/libdrm -I. -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++
+INCPATH       = -I. -isystem /usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I. -isystem /usr/include/libdrm -I. -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++
 QMAKE         = /opt/Qt5.14.1/5.14.1/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -40,7 +40,7 @@ DISTNAME      = App1.0.0
 DISTDIR = /home/lvxu/MyCat/cat/App/.tmp/App1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1 -Wl,-rpath,/opt/Qt5.14.1/5.14.1/gcc_64/lib
-LIBS          = $(SUBLIBS) /opt/Qt5.14.1/5.14.1/gcc_64/lib/libQt5Widgets.so /opt/Qt5.14.1/5.14.1/gcc_64/lib/libQt5Gui.so /opt/Qt5.14.1/5.14.1/gcc_64/lib/libQt5Core.so -lGL -lpthread   
+LIBS          = $(SUBLIBS) -L /home/lvxu/net/mqtt/arm_mqtt/paho.mqtt.c-master/MQinstall/lib/ -lpaho-mqtt3c /opt/Qt5.14.1/5.14.1/gcc_64/lib/libQt5Widgets.so /opt/Qt5.14.1/5.14.1/gcc_64/lib/libQt5Gui.so /opt/Qt5.14.1/5.14.1/gcc_64/lib/libQt5Core.so -lGL -lpthread   
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -69,6 +69,11 @@ SOURCES       = main.cpp \
 		../LOG/LogPlayback.cpp \
 		../LOG/LogRecoder.cpp \
 		../LOG/LogStore.cpp \
+		../Mqtt/mqttClinet.cpp \
+		../Mqtt/mqttSend.cpp \
+		../Communication/RecFromAir.cpp \
+		../Communication/SendToAir.cpp \
+		../Communication/ReadConf.cpp \
 		NetMonitor/netMonitor.cpp moc_mainwindow.cpp \
 		moc_wifi.cpp \
 		moc_dialogconnectmask.cpp \
@@ -93,6 +98,11 @@ OBJECTS       = main.o \
 		LogPlayback.o \
 		LogRecoder.o \
 		LogStore.o \
+		mqttClinet.o \
+		mqttSend.o \
+		RecFromAir.o \
+		SendToAir.o \
+		ReadConf.o \
 		netMonitor.o \
 		moc_mainwindow.o \
 		moc_wifi.o \
@@ -301,6 +311,8 @@ DIST          = /opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../KTV/KTV.pro \
 		../MJson/MJson.pro \
 		../LOG/LOG.pro \
+		../Mqtt/Mqtt.pro \
+		../Communication/Communication.pro \
 		NetMonitor/NetMonitor.pri \
 		/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/resolve_config.prf \
 		/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/default_post.prf \
@@ -348,6 +360,11 @@ DIST          = /opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../LOG/LogPlayback.h \
 		../LOG/LogRecoder.h \
 		../LOG/LogStore.h \
+		../Mqtt/mqttClinet.h \
+		../Mqtt/mqttSend.h \
+		../Communication/RecFromAir.h \
+		../Communication/SendToAir.h \
+		../Communication/ReadConf.h \
 		NetMonitor/netMonitor.h main.cpp \
 		mainwindow.cpp \
 		WIFI/wifi.cpp \
@@ -365,6 +382,11 @@ DIST          = /opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../LOG/LogPlayback.cpp \
 		../LOG/LogRecoder.cpp \
 		../LOG/LogStore.cpp \
+		../Mqtt/mqttClinet.cpp \
+		../Mqtt/mqttSend.cpp \
+		../Communication/RecFromAir.cpp \
+		../Communication/SendToAir.cpp \
+		../Communication/ReadConf.cpp \
 		NetMonitor/netMonitor.cpp
 QMAKE_TARGET  = App
 DESTDIR       = ../../../qt_output/executableProgram/cat/
@@ -578,6 +600,8 @@ Makefile: App.pro /opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++/qmake.conf /opt/
 		../KTV/KTV.pro \
 		../MJson/MJson.pro \
 		../LOG/LOG.pro \
+		../Mqtt/Mqtt.pro \
+		../Communication/Communication.pro \
 		NetMonitor/NetMonitor.pri \
 		/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/resolve_config.prf \
 		/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/default_post.prf \
@@ -798,6 +822,8 @@ UI/UI.pri:
 ../KTV/KTV.pro:
 ../MJson/MJson.pro:
 ../LOG/LOG.pro:
+../Mqtt/Mqtt.pro:
+../Communication/Communication.pro:
 NetMonitor/NetMonitor.pri:
 /opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/resolve_config.prf:
 /opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/default_post.prf:
@@ -832,8 +858,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h WIFI/wifi.h UI/WIFI/dialogconnectmask.h UI/WIFI/dialogscanmask.h UI/WIFI/dialogwificonnect.h ../Base/base.h ../Base/singleton.h ../Base/Thread.h ../KTV/Reader.h ../KTV/type.h ../KTV/variant.h ../KTV/variant_p.h ../KTV/Writer.h ../MJson/allocator.h ../MJson/assertions.h ../MJson/autolink.h ../MJson/config.h ../MJson/forwards.h ../MJson/json.h ../MJson/json_features.h ../MJson/json_tool.h ../MJson/reader.h ../MJson/value.h ../MJson/version.h ../MJson/writer.h ../LOG/Debug.h ../LOG/LogPlayback.h ../LOG/LogRecoder.h ../LOG/LogStore.h NetMonitor/netMonitor.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp WIFI/wifi.cpp UI/WIFI/dialogconnectmask.cpp UI/WIFI/dialogscanmask.cpp UI/WIFI/dialogwificonnect.cpp ../Base/base.cpp ../Base/Thread.cpp ../KTV/Reader.cpp ../KTV/variant.cpp ../KTV/Writer.cpp ../MJson/json_reader.cpp ../MJson/json_value.cpp ../MJson/json_writer.cpp ../LOG/LogPlayback.cpp ../LOG/LogRecoder.cpp ../LOG/LogStore.cpp NetMonitor/netMonitor.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h WIFI/wifi.h UI/WIFI/dialogconnectmask.h UI/WIFI/dialogscanmask.h UI/WIFI/dialogwificonnect.h ../Base/base.h ../Base/singleton.h ../Base/Thread.h ../KTV/Reader.h ../KTV/type.h ../KTV/variant.h ../KTV/variant_p.h ../KTV/Writer.h ../MJson/allocator.h ../MJson/assertions.h ../MJson/autolink.h ../MJson/config.h ../MJson/forwards.h ../MJson/json.h ../MJson/json_features.h ../MJson/json_tool.h ../MJson/reader.h ../MJson/value.h ../MJson/version.h ../MJson/writer.h ../LOG/Debug.h ../LOG/LogPlayback.h ../LOG/LogRecoder.h ../LOG/LogStore.h ../Mqtt/mqttClinet.h ../Mqtt/mqttSend.h ../Communication/RecFromAir.h ../Communication/SendToAir.h ../Communication/ReadConf.h NetMonitor/netMonitor.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mainwindow.cpp WIFI/wifi.cpp UI/WIFI/dialogconnectmask.cpp UI/WIFI/dialogscanmask.cpp UI/WIFI/dialogwificonnect.cpp ../Base/base.cpp ../Base/Thread.cpp ../KTV/Reader.cpp ../KTV/variant.cpp ../KTV/Writer.cpp ../MJson/json_reader.cpp ../MJson/json_value.cpp ../MJson/json_writer.cpp ../LOG/LogPlayback.cpp ../LOG/LogRecoder.cpp ../LOG/LogStore.cpp ../Mqtt/mqttClinet.cpp ../Mqtt/mqttSend.cpp ../Communication/RecFromAir.cpp ../Communication/SendToAir.cpp ../Communication/ReadConf.cpp NetMonitor/netMonitor.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mainwindow.ui UI/WIFI/dialogconnectmask.ui UI/WIFI/dialogscanmask.ui UI/WIFI/dialogwificonnect.ui $(DISTDIR)/
 
 
@@ -984,9 +1010,16 @@ moc_mainwindow.cpp: mainwindow.h \
 		UI/WIFI/dialogscanmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QDialog \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdialog.h \
+		NetMonitor/netMonitor.h \
+		../Base/singleton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Mqtt/mqttSend.h \
 		moc_predefs.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc
-	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
 moc_wifi.cpp: WIFI/wifi.h \
 		../Base/singleton.h \
@@ -1049,7 +1082,7 @@ moc_wifi.cpp: WIFI/wifi.h \
 		../Base/Thread.h \
 		moc_predefs.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc
-	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include WIFI/wifi.h -o moc_wifi.cpp
+	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include WIFI/wifi.h -o moc_wifi.cpp
 
 moc_dialogconnectmask.cpp: UI/WIFI/dialogconnectmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QDialog \
@@ -1159,7 +1192,7 @@ moc_dialogconnectmask.cpp: UI/WIFI/dialogconnectmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtouchdevice.h \
 		moc_predefs.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc
-	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include UI/WIFI/dialogconnectmask.h -o moc_dialogconnectmask.cpp
+	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include UI/WIFI/dialogconnectmask.h -o moc_dialogconnectmask.cpp
 
 moc_dialogscanmask.cpp: UI/WIFI/dialogscanmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QDialog \
@@ -1269,7 +1302,7 @@ moc_dialogscanmask.cpp: UI/WIFI/dialogscanmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtouchdevice.h \
 		moc_predefs.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc
-	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include UI/WIFI/dialogscanmask.h -o moc_dialogscanmask.cpp
+	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include UI/WIFI/dialogscanmask.h -o moc_dialogscanmask.cpp
 
 moc_dialogwificonnect.cpp: UI/WIFI/dialogwificonnect.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QDialog \
@@ -1380,7 +1413,7 @@ moc_dialogwificonnect.cpp: UI/WIFI/dialogwificonnect.h \
 		UI/WIFI/dialogconnectmask.h \
 		moc_predefs.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc
-	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include UI/WIFI/dialogwificonnect.h -o moc_dialogwificonnect.cpp
+	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include UI/WIFI/dialogwificonnect.h -o moc_dialogwificonnect.cpp
 
 moc_base.cpp: ../Base/base.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
@@ -1453,7 +1486,7 @@ moc_base.cpp: ../Base/base.h \
 		../LOG/Debug.h \
 		moc_predefs.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc
-	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../Base/base.h -o moc_base.cpp
+	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../Base/base.h -o moc_base.cpp
 
 moc_netMonitor.cpp: NetMonitor/netMonitor.h \
 		../Base/singleton.h \
@@ -1513,9 +1546,10 @@ moc_netMonitor.cpp: NetMonitor/netMonitor.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QTimer \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtimer.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Mqtt/mqttSend.h \
 		moc_predefs.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc
-	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include NetMonitor/netMonitor.h -o moc_netMonitor.cpp
+	/opt/Qt5.14.1/5.14.1/gcc_64/bin/moc $(DEFINES) --include /home/lvxu/MyCat/cat/App/moc_predefs.h -I/opt/Qt5.14.1/5.14.1/gcc_64/mkspecs/linux-g++ -I/home/lvxu/MyCat/cat/App -I/usr/local/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui -I/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include NetMonitor/netMonitor.h -o moc_netMonitor.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -1661,6 +1695,13 @@ main.o: main.cpp mainwindow.h \
 		UI/WIFI/dialogscanmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QDialog \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdialog.h \
+		NetMonitor/netMonitor.h \
+		../Base/singleton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Mqtt/mqttSend.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QApplication \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qapplication.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreapplication.h \
@@ -1668,7 +1709,16 @@ main.o: main.cpp mainwindow.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdesktopwidget.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qguiapplication.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qinputmethod.h \
-		../LOG/LogStore.h
+		../LOG/LogStore.h \
+		../Communication/RecFromAir.h \
+		../Base/Thread.h \
+		../Mqtt/mqttClinet.h \
+		../LOG/Debug.h \
+		../LOG/LogRecoder.h \
+		../Base/base.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QDebug \
+		../Communication/SendToAir.h \
+		../Communication/ReadConf.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mainwindow.o: mainwindow.cpp mainwindow.h \
@@ -1782,18 +1832,54 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		UI/WIFI/dialogscanmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QDialog \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdialog.h \
-		ui_mainwindow.h \
-		WIFI/wifi.h \
+		NetMonitor/netMonitor.h \
 		../Base/singleton.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QTimer \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtimer.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Mqtt/mqttSend.h \
+		ui_mainwindow.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QVariant \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QApplication \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qeventloop.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qguiapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qinputmethod.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QLabel \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qlabel.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qframe.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QListWidget \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qlistwidget.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qlistview.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qabstractitemmodel.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qitemselectionmodel.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qstyleoption.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qvalidator.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qregularexpression.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qslider.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qabstractslider.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qstyle.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qtabbar.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qrubberband.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QPushButton \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qpushbutton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QTabWidget \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QWidget \
+		WIFI/wifi.h \
 		../Base/Thread.h \
 		UI/WIFI/dialogwificonnect.h \
 		UI/WIFI/dialogconnectmask.h \
-		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QDebug \
+		../Communication/ReadConf.h \
 		../Base/base.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QDebug \
 		../LOG/LogRecoder.h \
 		../LOG/Debug.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QString
@@ -1985,6 +2071,17 @@ dialogconnectmask.o: UI/WIFI/dialogconnectmask.cpp UI/WIFI/dialogconnectmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qvector2d.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtouchdevice.h \
 		ui_dialogconnectmask.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QVariant \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QApplication \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qeventloop.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qguiapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qinputmethod.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QLabel \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qlabel.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qframe.h \
 		WIFI/wifi.h \
 		../Base/singleton.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
@@ -2100,7 +2197,18 @@ dialogscanmask.o: UI/WIFI/dialogscanmask.cpp UI/WIFI/dialogscanmask.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qfiledevice.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qvector2d.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtouchdevice.h \
-		ui_dialogscanmask.h
+		ui_dialogscanmask.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QVariant \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QApplication \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qeventloop.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qguiapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qinputmethod.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QLabel \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qlabel.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qframe.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dialogscanmask.o UI/WIFI/dialogscanmask.cpp
 
 dialogwificonnect.o: UI/WIFI/dialogwificonnect.cpp UI/WIFI/dialogwificonnect.h \
@@ -2211,6 +2319,29 @@ dialogwificonnect.o: UI/WIFI/dialogwificonnect.cpp UI/WIFI/dialogwificonnect.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtouchdevice.h \
 		UI/WIFI/dialogconnectmask.h \
 		ui_dialogwificonnect.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QVariant \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QApplication \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qeventloop.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qguiapplication.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qinputmethod.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QDialogButtonBox \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qdialogbuttonbox.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QLabel \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qlabel.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qframe.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QLineEdit \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qlineedit.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtextcursor.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtextformat.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qpen.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qtextoption.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/QPushButton \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qpushbutton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtWidgets/qabstractbutton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/qicon.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtGui/QKeyEvent \
 		../Base/base.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
@@ -2360,6 +2491,249 @@ LogStore.o: ../LOG/LogStore.cpp ../LOG/LogStore.h \
 		../LOG/Debug.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o LogStore.o ../LOG/LogStore.cpp
 
+mqttClinet.o: ../Mqtt/mqttClinet.cpp ../Mqtt/mqttClinet.h \
+		../LOG/Debug.h \
+		../LOG/LogRecoder.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mqttClinet.o ../Mqtt/mqttClinet.cpp
+
+mqttSend.o: ../Mqtt/mqttSend.cpp ../Mqtt/mqttSend.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mqttSend.o ../Mqtt/mqttSend.cpp
+
+RecFromAir.o: ../Communication/RecFromAir.cpp ../Communication/RecFromAir.h \
+		../Base/Thread.h \
+		NetMonitor/netMonitor.h \
+		../Base/singleton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtcore-config.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qversiontagging.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringliteral.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringview.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobject_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Mqtt/mqttSend.h \
+		../Mqtt/mqttClinet.h \
+		../LOG/Debug.h \
+		../LOG/LogRecoder.h \
+		../Base/base.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qhash.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../Communication/ReadConf.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o RecFromAir.o ../Communication/RecFromAir.cpp
+
+SendToAir.o: ../Communication/SendToAir.cpp ../Communication/SendToAir.h \
+		../Base/Thread.h \
+		NetMonitor/netMonitor.h \
+		../Base/singleton.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtcore-config.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qversiontagging.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringliteral.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringview.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobject_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QTimer \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtimer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Mqtt/mqttSend.h \
+		../Mqtt/mqttClinet.h \
+		../LOG/Debug.h \
+		../LOG/LogRecoder.h \
+		../Base/base.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qhash.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../Communication/ReadConf.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o SendToAir.o ../Communication/SendToAir.cpp
+
+ReadConf.o: ../Communication/ReadConf.cpp ../Communication/ReadConf.h \
+		../Base/base.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobject.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobjectdefs.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qnamespace.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qglobal.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qconfig.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtcore-config.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsystemdetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qprocessordetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcompilerdetection.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtypeinfo.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsysinfo.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlogging.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qflags.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasicatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qgenericatomic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qatomic_msvc.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qglobalstatic.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmutex.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qnumeric.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qversiontagging.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstring.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qchar.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbytearray.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qrefcount.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qarraydata.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringliteral.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringalgorithms.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringview.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringbuilder.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qalgorithms.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qiterator.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qhashfunctions.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qpair.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvector.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontainertools_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qpoint.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbytearraylist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringlist.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qregexp.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qstringmatcher.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcoreevent.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qscopedpointer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmetatype.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvarlengtharray.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontainerfwd.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobject_impl.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QDebug \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qdebug.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qhash.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qmap.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtextstream.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qiodevice.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qlocale.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qvariant.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qshareddata.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qset.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qcontiguouscache.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsharedpointer.h \
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		../LOG/LogRecoder.h \
+		../LOG/Debug.h \
+		../Base/singleton.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ReadConf.o ../Communication/ReadConf.cpp
+
 netMonitor.o: NetMonitor/netMonitor.cpp NetMonitor/netMonitor.h \
 		../Base/singleton.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QObject \
@@ -2417,7 +2791,8 @@ netMonitor.o: NetMonitor/netMonitor.cpp NetMonitor/netMonitor.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qobject_impl.h \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/QTimer \
 		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qtimer.h \
-		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h
+		/opt/Qt5.14.1/5.14.1/gcc_64/include/QtCore/qbasictimer.h \
+		../Mqtt/mqttSend.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o netMonitor.o NetMonitor/netMonitor.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
